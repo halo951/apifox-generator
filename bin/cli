@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+const ApifoxGenerator = require('../dist').default
+
+new ApifoxGenerator().exec()

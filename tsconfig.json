@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "commonjs",
+        "strict": false,
+        "jsx": "preserve",
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "useDefineForClassFields": true,
+        "allowJs": true,
+        "baseUrl": ".",
+        "emitDecoratorMetadata": true,
+        "types": ["node"],
+        "paths": {},
+        "lib": ["esnext"],
+        "resolveJsonModule": true,
+        "outDir": "./dist",
+        "declaration": true,
+        "declarationDir": "./typings"
+    },
+    "include": ["scripts/*.ts"],
+    "exclude": ["node_modules"]
+}

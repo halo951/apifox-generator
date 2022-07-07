@@ -1,0 +1,19 @@
+{
+    "requestTemplate": {
+        "name": "basic axios",
+        "headerComment": [
+            "/** 接口集合 - [folder name]",
+            " *",
+            " * @apifox [apifox address]",
+            " * @author apifox-generator",
+            " * @date (最后一次更新日期) [last update]",
+            " */",
+            ""
+        ],
+        "importSyntax": "import axios from 'axios'",
+        "requestUtil": "axios",
+        "responseExtend": null,
+        "globalParamsKey": [],
+        "globalResponseKey": []
+    }
+}
