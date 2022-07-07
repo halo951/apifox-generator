@@ -1,0 +1,1619 @@
+[
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "project_ids", "departType", "selectedMonth", "pd"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedMonth", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27685991,
+        "name": "本月工单统计",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryCurrentMonthWorkOrderDatas",
+        "customApiFields": null,
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 10,
+        "creatorId": 467550,
+        "editorId": 467550,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T01:08:59.000Z",
+        "updatedAt": "2022-07-05T01:08:59.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Item": {
+                            "type": "object",
+                            "properties": {
+                                "inspectOrderNum": {
+                                    "type": "integer"
+                                },
+                                "overdueUNum": {
+                                    "type": "integer"
+                                },
+                                "orderNum": {
+                                    "type": "integer"
+                                },
+                                "timeFNum": {
+                                    "type": "integer"
+                                },
+                                "maintainOrderNum": {
+                                    "type": "integer"
+                                },
+                                "overdueFNum": {
+                                    "type": "integer"
+                                },
+                                "timelyCompleteRate": {
+                                    "type": "integer"
+                                },
+                                "repairOrderNum": {
+                                    "type": "integer"
+                                },
+                                "runOrderNum": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "inspectOrderNum",
+                                "overdueUNum",
+                                "orderNum",
+                                "timeFNum",
+                                "maintainOrderNum",
+                                "overdueFNum",
+                                "timelyCompleteRate",
+                                "repairOrderNum",
+                                "runOrderNum"
+                            ],
+                            "x-apifox-orders": [
+                                "inspectOrderNum",
+                                "overdueUNum",
+                                "orderNum",
+                                "timeFNum",
+                                "maintainOrderNum",
+                                "overdueFNum",
+                                "timelyCompleteRate",
+                                "repairOrderNum",
+                                "runOrderNum"
+                            ]
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Item", "Result"],
+                    "x-apifox-orders": ["Item", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64519145,
+                "name": "成功",
+                "apiDetailId": 27685991,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T01:08:59.000Z",
+                "updatedAt": "2022-07-05T01:08:59.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "examineType": {
+                        "type": "string",
+                        "title": "考核类型code"
+                    },
+                    "criterionId": {
+                        "type": "string",
+                        "title": "检查标准id"
+                    },
+                    "startTimeStr": {
+                        "type": "string",
+                        "title": "开始时间点"
+                    },
+                    "endTimeStr": {
+                        "type": "string",
+                        "title": "结束时间点"
+                    },
+                    "projectIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "项目集合"
+                    }
+                },
+                "required": ["examineType", "endTimeStr", "startTimeStr", "criterionId", "projectIds"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27743387,
+        "name": "本月安全检查统计信息",
+        "type": "http",
+        "serverId": "",
+        "description": "安全检查平均得分=【筛选集团/省权限下项目平均得分+周平均得分】/2\n安全检查平均得分=【筛选项目得分+周平均得分】/2\n项目平均得分=本月筛选集团/省权限下项目得分之和/本月筛选集团/省权限下已完成评分的项目个数；\n提报问题数量=本月筛选集团/省权限下项目提报问题之和\n问题整改完成率=本月筛选集团/省权限下项目已整改数量之和/本月筛选集团/省权限下项目提报问题数量*100%\n周平均得分=【筛选范围第1周平均得分+第2周平均得分+第N周平均得分】/N\n",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/examine/dashboard/queryExamineTaskStatistics",
+        "customApiFields": null,
+        "projectId": 1225216,
+        "folderId": 5596450,
+        "ordering": 10,
+        "creatorId": 584420,
+        "editorId": 584420,
+        "responsibleId": 584420,
+        "createdAt": "2022-07-05T03:32:52.000Z",
+        "updatedAt": "2022-07-05T03:56:03.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "respCode": {
+                            "type": "string"
+                        },
+                        "respMsg": {
+                            "type": "string"
+                        },
+                        "content": {
+                            "type": "object",
+                            "properties": {
+                                "averageScore": {
+                                    "type": "string",
+                                    "title": "周平均分"
+                                },
+                                "reformRate": {
+                                    "type": "string",
+                                    "title": "整改率"
+                                },
+                                "submitNum": {
+                                    "type": "string",
+                                    "title": "提报问题数"
+                                },
+                                "score": {
+                                    "type": "string",
+                                    "title": "得分"
+                                }
+                            },
+                            "required": ["averageScore", "reformRate", "submitNum", "score"]
+                        }
+                    },
+                    "required": ["respCode", "respMsg", "content"]
+                },
+                "defaultEnable": true,
+                "id": 64701565,
+                "name": "成功",
+                "apiDetailId": 27743387,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T03:32:52.000Z",
+                "updatedAt": "2022-07-05T03:32:52.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "project_ids", "selectedMonth", "pd"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedMonth", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27686088,
+        "name": "三关一闭（时间）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryRunData",
+        "customApiFields": null,
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 19,
+        "creatorId": 467550,
+        "editorId": 584420,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T01:10:25.000Z",
+        "updatedAt": "2022-07-05T06:18:15.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "total": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "timelyCompleteRate": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "x-apifox-orders": ["total", "type", "timelyCompleteRate"]
+                            }
+                        },
+                        "Count": {
+                            "type": "integer"
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Content", "Count", "Result"],
+                    "x-apifox-orders": ["Content", "Count", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64519282,
+                "name": "成功",
+                "apiDetailId": 27686088,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T01:10:25.000Z",
+                "updatedAt": "2022-07-05T01:10:25.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "project_ids", "selectedMonth", "pd"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedMonth", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27691440,
+        "name": "三关一闭 （人员）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryPersonRunData",
+        "customApiFields": "",
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 20,
+        "creatorId": 467550,
+        "editorId": 467550,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T01:39:18.000Z",
+        "updatedAt": "2022-07-05T06:15:35.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "total": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "timelyCompleteRate": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "x-apifox-orders": ["total", "type", "timelyCompleteRate"]
+                            }
+                        },
+                        "Count": {
+                            "type": "integer"
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Content", "Count", "Result"],
+                    "x-apifox-orders": ["Content", "Count", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64533159,
+                "name": "成功",
+                "apiDetailId": 27691440,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T01:39:18.000Z",
+                "updatedAt": "2022-07-05T01:39:18.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "examineType": {
+                        "type": "string",
+                        "title": "类型"
+                    },
+                    "criterionId": {
+                        "type": "string",
+                        "title": "检查标准id"
+                    },
+                    "startTimeStr": {
+                        "type": "string",
+                        "title": "开始时间"
+                    },
+                    "endTimeStr": {
+                        "type": "string",
+                        "title": "结束时间"
+                    },
+                    "projectIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "项目集合"
+                    }
+                },
+                "required": ["examineType", "projectIds", "endTimeStr", "startTimeStr", "criterionId"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27745357,
+        "name": "本月每周安全检查统计信息",
+        "type": "http",
+        "serverId": "",
+        "description": "周平均得分=【筛选范围第1周平均得分+第2周平均得分+第N周平均得分】/N\n",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/examine/dashboard/queryExamineTaskWeeklyStatistics",
+        "customApiFields": null,
+        "projectId": 1225216,
+        "folderId": 5596450,
+        "ordering": 20,
+        "creatorId": 584420,
+        "editorId": 584420,
+        "responsibleId": 584420,
+        "createdAt": "2022-07-05T03:37:11.000Z",
+        "updatedAt": "2022-07-05T03:56:22.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "respCode": {
+                            "type": "string"
+                        },
+                        "respMsg": {
+                            "type": "string"
+                        },
+                        "content": {
+                            "type": "object",
+                            "properties": {
+                                "averageScore": {
+                                    "type": "string",
+                                    "title": "平均得分"
+                                },
+                                "weekResults": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "title": "周名"
+                                            },
+                                            "reformRate": {
+                                                "type": "string",
+                                                "title": "整改率"
+                                            },
+                                            "submitNum": {
+                                                "type": "string",
+                                                "title": "提报问题数"
+                                            },
+                                            "score": {
+                                                "type": "string",
+                                                "title": "得分"
+                                            }
+                                        },
+                                        "required": ["name", "reformRate", "score", "submitNum"]
+                                    },
+                                    "title": "周数据"
+                                }
+                            },
+                            "required": ["averageScore", "weekResults"]
+                        }
+                    },
+                    "required": ["respCode", "content", "respMsg"]
+                },
+                "defaultEnable": true,
+                "id": 64707246,
+                "name": "成功",
+                "apiDetailId": 27745357,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T03:37:11.000Z",
+                "updatedAt": "2022-07-05T03:56:22.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "string"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "pd", "selectedMonth", "departType", "project_ids"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27777493,
+        "name": "三关一闭（项目）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryProjectRunData",
+        "customApiFields": null,
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 21,
+        "creatorId": 584420,
+        "editorId": 584420,
+        "responsibleId": 584420,
+        "createdAt": "2022-07-05T06:15:31.000Z",
+        "updatedAt": "2022-07-05T06:21:29.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Result": {
+                            "type": "string"
+                        },
+                        "ResultCode": {
+                            "type": "string"
+                        },
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "project_id": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "orderFNum": {
+                                        "type": "integer"
+                                    },
+                                    "orderUNum": {
+                                        "type": "integer"
+                                    },
+                                    "timelyCompleteRate": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["project_id", "orderUNum", "orderFNum", "name", "timelyCompleteRate"]
+                            }
+                        }
+                    },
+                    "required": ["Result", "Content", "ResultCode"]
+                },
+                "defaultEnable": true,
+                "id": 64817052,
+                "name": "成功",
+                "apiDetailId": 27777493,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T06:15:31.000Z",
+                "updatedAt": "2022-07-05T06:21:29.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "project_ids", "departType", "selectedMonth", "pd"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedMonth", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27691608,
+        "name": "维保统计（时间）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryMaintainData",
+        "customApiFields": "",
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 22,
+        "creatorId": 467550,
+        "editorId": 584420,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T01:39:47.000Z",
+        "updatedAt": "2022-07-05T06:22:40.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "total": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "timelyCompleteRate": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "x-apifox-orders": ["total", "type", "timelyCompleteRate"]
+                            }
+                        },
+                        "Count": {
+                            "type": "integer"
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Content", "Count", "Result"],
+                    "x-apifox-orders": ["Content", "Count", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64533748,
+                "name": "成功",
+                "apiDetailId": 27691608,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T01:39:47.000Z",
+                "updatedAt": "2022-07-05T01:39:47.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "project_ids", "departType", "selectedMonth", "pd"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedMonth", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27691611,
+        "name": "维保统计（人员）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryPersonMaintainData",
+        "customApiFields": "",
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 23,
+        "creatorId": 467550,
+        "editorId": 467550,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T01:39:49.000Z",
+        "updatedAt": "2022-07-05T01:40:53.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "total": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "timelyCompleteRate": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "x-apifox-orders": ["total", "type", "timelyCompleteRate"]
+                            }
+                        },
+                        "Count": {
+                            "type": "integer"
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Content", "Count", "Result"],
+                    "x-apifox-orders": ["Content", "Count", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64533751,
+                "name": "成功",
+                "apiDetailId": 27691611,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T01:39:49.000Z",
+                "updatedAt": "2022-07-05T01:39:49.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "string"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "pd", "selectedMonth", "departType", "project_ids"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27781463,
+        "name": "维保统计（项目）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryProjectMaintainData",
+        "customApiFields": null,
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 24,
+        "creatorId": 584420,
+        "editorId": 584420,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T06:23:39.000Z",
+        "updatedAt": "2022-07-05T06:25:52.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Result": {
+                            "type": "string"
+                        },
+                        "ResultCode": {
+                            "type": "string"
+                        },
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "project_id": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "pointTimeFNum": {
+                                        "type": "string"
+                                    },
+                                    "pointOverdueFNum": {
+                                        "type": "string"
+                                    },
+                                    "pointUNum": {
+                                        "type": "string"
+                                    },
+                                    "pointTimeFNumRate": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "project_id",
+                                    "name",
+                                    "pointTimeFNum",
+                                    "pointUNum",
+                                    "pointOverdueFNum",
+                                    "pointTimeFNumRate"
+                                ]
+                            }
+                        }
+                    },
+                    "required": ["Result", "Content", "ResultCode"]
+                },
+                "defaultEnable": true,
+                "id": 64828630,
+                "name": "成功",
+                "apiDetailId": 27781463,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T06:23:39.000Z",
+                "updatedAt": "2022-07-05T06:25:52.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "project_ids", "departType", "selectedMonth", "pd"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedMonth", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27686145,
+        "name": "报修统计",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryRepairData",
+        "customApiFields": null,
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 30,
+        "creatorId": 467550,
+        "editorId": 467550,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T01:11:44.000Z",
+        "updatedAt": "2022-07-05T01:11:44.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "eventTimelyCompleteRate": {
+                                        "type": "integer"
+                                    },
+                                    "total": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["eventTimelyCompleteRate", "total", "type"],
+                                "x-apifox-orders": ["eventTimelyCompleteRate", "total", "type"]
+                            }
+                        },
+                        "Count": {
+                            "type": "integer"
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Content", "Count", "Result"],
+                    "x-apifox-orders": ["Content", "Count", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64519372,
+                "name": "成功",
+                "apiDetailId": 27686145,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T01:11:44.000Z",
+                "updatedAt": "2022-07-05T01:11:44.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "pd": {
+                        "type": "string"
+                    },
+                    "selectedYear": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "project_ids", "pd"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedYear", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27693750,
+        "name": "专项任务统计（app）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/task/appHomePageService/querySpecialTaskData",
+        "customApiFields": "",
+        "projectId": 1225216,
+        "folderId": 5596443,
+        "ordering": 33,
+        "creatorId": 467550,
+        "editorId": 467550,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T01:45:59.000Z",
+        "updatedAt": "2022-07-05T03:38:35.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Item": {
+                            "type": "object",
+                            "properties": {
+                                "timeFNum": {
+                                    "type": "integer",
+                                    "title": "按时完成"
+                                },
+                                "overdueFNum": {
+                                    "type": "integer",
+                                    "title": "逾期完成"
+                                },
+                                "overdueNum": {
+                                    "type": "string",
+                                    "title": "逾期未完成"
+                                },
+                                "taskNum": {
+                                    "type": "integer",
+                                    "title": "任务数"
+                                }
+                            },
+                            "required": [],
+                            "x-apifox-orders": ["taskNum", "timeFNum", "overdueFNum", "overdueNum"]
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Item", "Result"],
+                    "x-apifox-orders": ["Item", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64541105,
+                "name": "成功",
+                "apiDetailId": 27693750,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T01:45:59.000Z",
+                "updatedAt": "2022-07-05T01:54:18.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "selectedMonth": {
+                        "type": "string"
+                    },
+                    "pd": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id", "project_ids", "departType", "selectedMonth", "pd"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedMonth", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27705445,
+        "name": "报修统计（集团）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "workorder/groupHomePageService/queryRepairData",
+        "customApiFields": "",
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 33,
+        "creatorId": 467550,
+        "editorId": 467550,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T02:15:52.000Z",
+        "updatedAt": "2022-07-05T02:16:10.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "eventTimelyCompleteRate": {
+                                        "type": "integer"
+                                    },
+                                    "total": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["eventTimelyCompleteRate", "total", "type"],
+                                "x-apifox-orders": ["eventTimelyCompleteRate", "total", "type"]
+                            }
+                        },
+                        "Count": {
+                            "type": "integer"
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Content", "Count", "Result"],
+                    "x-apifox-orders": ["Content", "Count", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64581674,
+                "name": "成功",
+                "apiDetailId": 27705445,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T02:15:52.000Z",
+                "updatedAt": "2022-07-05T02:15:52.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_id": {
+                        "type": "string"
+                    },
+                    "departType": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["user_id", "project_id", "departType"],
+                "x-apifox-orders": ["user_id", "project_id", "departType"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27687298,
+        "name": "报修统计（人员）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/workorder/appHomePageService/queryPersonRepairData",
+        "customApiFields": "",
+        "projectId": 1225216,
+        "folderId": 5596438,
+        "ordering": 36,
+        "creatorId": 467550,
+        "editorId": 467550,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T01:19:50.000Z",
+        "updatedAt": "2022-07-05T01:26:38.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Content": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "eventTimelyCompleteRate": {
+                                        "type": "integer"
+                                    },
+                                    "total": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["eventTimelyCompleteRate", "total", "type"],
+                                "x-apifox-orders": ["eventTimelyCompleteRate", "total", "type"]
+                            }
+                        },
+                        "Count": {
+                            "type": "integer"
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Content", "Count", "Result"],
+                    "x-apifox-orders": ["Content", "Count", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64521819,
+                "name": "成功",
+                "apiDetailId": 27687298,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T01:19:50.000Z",
+                "updatedAt": "2022-07-05T01:19:50.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    },
+    {
+        "tags": [],
+        "status": "developing",
+        "requestBody": {
+            "type": "application/json",
+            "parameters": [],
+            "jsonSchema": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "project_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "departType": {
+                        "type": "integer"
+                    },
+                    "pd": {
+                        "type": "string"
+                    },
+                    "selectedYear": {
+                        "type": "string"
+                    }
+                },
+                "required": ["user_id"],
+                "x-apifox-orders": ["user_id", "project_ids", "departType", "selectedYear", "pd"]
+            }
+        },
+        "parameters": {},
+        "commonParameters": {
+            "query": [],
+            "body": [],
+            "cookie": [],
+            "header": []
+        },
+        "auth": {},
+        "commonResponseStatus": {},
+        "advancedSettings": {},
+        "mockScript": {},
+        "id": 27706789,
+        "name": "专项任务统计 （集团）",
+        "type": "http",
+        "serverId": "",
+        "description": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "method": "post",
+        "path": "/task/groupHomePageService/querySpecialTaskData",
+        "customApiFields": "",
+        "projectId": 1225216,
+        "folderId": 5596443,
+        "ordering": 39,
+        "creatorId": 467550,
+        "editorId": 467550,
+        "responsibleId": 0,
+        "createdAt": "2022-07-05T02:18:15.000Z",
+        "updatedAt": "2022-07-05T03:38:43.000Z",
+        "deletedAt": null,
+        "responses": [
+            {
+                "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                        "Item": {
+                            "type": "object",
+                            "properties": {
+                                "timeFNum": {
+                                    "type": "integer",
+                                    "title": "按时完成"
+                                },
+                                "overdueFNum": {
+                                    "type": "integer",
+                                    "title": "逾期完成"
+                                },
+                                "overdueNum": {
+                                    "type": "string",
+                                    "title": "逾期未完成"
+                                },
+                                "taskNum": {
+                                    "type": "integer",
+                                    "title": "任务数"
+                                }
+                            },
+                            "required": ["taskNum", "timeFNum", "overdueFNum", "overdueNum"],
+                            "x-apifox-orders": ["taskNum", "timeFNum", "overdueFNum", "overdueNum"]
+                        },
+                        "Result": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["Item", "Result"],
+                    "x-apifox-orders": ["Item", "Result"]
+                },
+                "defaultEnable": true,
+                "id": 64584600,
+                "name": "成功",
+                "apiDetailId": 27706789,
+                "projectId": 0,
+                "code": 200,
+                "contentType": "json",
+                "ordering": 1,
+                "createdAt": "2022-07-05T02:18:15.000Z",
+                "updatedAt": "2022-07-05T02:18:15.000Z",
+                "deletedAt": null
+            }
+        ],
+        "responseExamples": []
+    }
+]
