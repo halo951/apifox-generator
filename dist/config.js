@@ -30,8 +30,8 @@ exports.ConfigLoader = void 0;
 const np = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const axios_1 = __importDefault(require("axios"));
-const input_1 = require("./utils/input");
 const prettier_1 = __importDefault(require("prettier"));
+const input_1 = require("./utils/input");
 /** Apifox genetator 配置文件读取 & 生成 */
 class ConfigLoader {
     static configFilePath = ['apifox.rule.json'].map((r) => np.join(process.cwd(), r));

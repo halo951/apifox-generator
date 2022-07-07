@@ -6,6 +6,7 @@ import prettier from 'prettier'
 import dayjs from 'dayjs'
 import { mkdirsSync } from 'fs-extra'
 import { ESLint } from 'eslint' // 通过eslint + prettier + @typescript-eslint 格式化 输出文件
+import { GroupBy } from 'array-grouping'
 
 import { IConfig, IDetail, ITreeNode, IApiOriginInfo } from './intf'
 
@@ -34,6 +35,7 @@ export class Generator {
         this.details = details
         const { outDir, usage } = config
         const cache: Array<{ mapFile: string; header: string; context: string }> = []
+
         // ? 遍历并生成文件集合
         for (const { id, name, mapFile } of usage) {
             // 从 treeNode 中, 拿到当前 folder 的子集
@@ -44,6 +46,7 @@ export class Generator {
                 const info = await this.transformApiInfo(detail)
                 maps.push(info)
             }
+            this.transformDuplicateApiNames(maps)
             // 生成文件头
             const header: string = this.generateHeader(name)
             // 生成文件内容
@@ -78,7 +81,7 @@ export class Generator {
 
     /** 转换元数据为生成接口需要的信息 */
     async transformApiInfo(detail: IDetail): Promise<IApiOriginInfo> {
-        const { method, path, name, createdAt, updatedAt } = detail
+        const { id, method, path, name, createdAt, updatedAt } = detail
         const { globalParamsKey, globalResponseKey, responseExtend } = this.config.requestTemplate
         const basename: string = formatToHump(np.basename(path))
         const paramsInterfaceName: string = formatInterfaceName(np.basename(path), 'Params')
@@ -117,6 +120,7 @@ export class Generator {
         }
 
         return {
+            id,
             method,
             path,
             name,
@@ -128,6 +132,31 @@ export class Generator {
             responses: responses,
             paramsName: paramsInterfaceName,
             responseNames
+        }
+    }
+
+    /** 对相同 basename 的接口, 增加序号后缀
+     *
+     * @description 注: 相同path的, 给定相同的 basename (用于检查后端定义的接口地址是否重复)
+     */
+    transformDuplicateApiNames(maps: Array<IApiOriginInfo>): void {
+        const total: Array<Array<IApiOriginInfo>> = GroupBy(maps, (a, b) => {
+            return a.basename === b.basename
+        })
+
+        for (const children of total) {
+            if (children.length > 1) {
+                const dupNameGroup = GroupBy(children, (a, b) => a.path === b.path)
+                if (dupNameGroup.length === 1) continue
+                let n = 0
+                for (const cs of dupNameGroup) {
+                    for (const c of cs) {
+                        // maps.find((m) => m.id === c.id).basename += n
+                        c.basename += n
+                    }
+                    n++
+                }
+            }
         }
     }
 

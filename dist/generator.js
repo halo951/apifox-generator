@@ -30,57 +30,14 @@ exports.Generator = void 0;
 const fs = __importStar(require("fs"));
 const np = __importStar(require("path"));
 const json2ts = __importStar(require("json-schema-to-typescript"));
-const fs_extra_1 = require("fs-extra");
 const prettier_1 = __importDefault(require("prettier"));
 const dayjs_1 = __importDefault(require("dayjs"));
+const fs_extra_1 = require("fs-extra");
 const eslint_1 = require("eslint"); // 通过eslint + prettier + @typescript-eslint 格式化 输出文件
+const array_grouping_1 = require("array-grouping");
 const prettier_config_1 = __importDefault(require("./data/prettier.config"));
-const formatToHump = (value) => {
-    return value.replace(/[\_\-](\w)/g, (_, letter) => letter.toUpperCase());
-};
-const formatInterfaceName = (value, suffix) => {
-    value = formatToHump(value);
-    value = value.replace(/^([\w])/, (_, $1) => $1.toUpperCase());
-    return `I${value}${suffix}`;
-};
-const transform = (schema, globalKey) => {
-    for (const key in schema) {
-        // add additionalProperties at false
-        if (key === 'type')
-            schema['additionalProperties'] = false;
-        if (key === 'properties') {
-            for (const k in schema['properties']) {
-                const prop = schema['properties'][k];
-                // remove global key
-                if (globalKey.includes(k)) {
-                    delete schema['properties'][k];
-                }
-                // title to description
-                if (prop.title) {
-                    if (prop.description) {
-                        prop.description = prop.title + ' | ' + prop.description;
-                    }
-                    else {
-                        prop.description = prop.title;
-                    }
-                    delete prop.title;
-                }
-            }
-        }
-        // deep object
-        if (typeof schema[key] === 'object')
-            transform(schema[key], globalKey);
-    }
-};
-/** 添加接口继承的父类 */
-const appendParentInterface = (schame, parentInterface) => {
-    if (parentInterface) {
-        schame['extends'] = {
-            title: parentInterface,
-            type: 'any'
-        };
-    }
-};
+const schema_1 = require("./utils/schema");
+const format_1 = require("./utils/format");
 /** 基于 apifox 定义的接口生成器逻辑 */
 class Generator {
     config;
@@ -111,6 +68,7 @@ class Generator {
                 const info = await this.transformApiInfo(detail);
                 maps.push(info);
             }
+            this.transformDuplicateApiNames(maps);
             // 生成文件头
             const header = this.generateHeader(name);
             // 生成文件内容
@@ -143,12 +101,12 @@ class Generator {
     }
     /** 转换元数据为生成接口需要的信息 */
     async transformApiInfo(detail) {
-        const { method, path, name, createdAt, updatedAt } = detail;
+        const { id, method, path, name, createdAt, updatedAt } = detail;
         const { globalParamsKey, globalResponseKey, responseExtend } = this.config.requestTemplate;
-        const basename = formatToHump(np.basename(path));
-        const paramsInterfaceName = formatInterfaceName(np.basename(path), 'Params');
-        let responseInterfaceName = formatInterfaceName(np.basename(path), 'Response');
-        transform(detail.requestBody.jsonSchema, globalParamsKey);
+        const basename = (0, format_1.formatToHump)(np.basename(path));
+        const paramsInterfaceName = (0, format_1.formatInterfaceName)(np.basename(path), 'Params');
+        let responseInterfaceName = (0, format_1.formatInterfaceName)(np.basename(path), 'Response');
+        (0, schema_1.transform)(detail.requestBody.jsonSchema, globalParamsKey);
         let params = '';
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
             params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, {
@@ -164,8 +122,8 @@ class Generator {
         const responseNames = [];
         const responses = [];
         for (const resp of detail.responses) {
-            transform(resp.jsonSchema, globalResponseKey);
-            appendParentInterface(resp.jsonSchema, responseExtend);
+            (0, schema_1.transform)(resp.jsonSchema, globalResponseKey);
+            (0, schema_1.appendParentInterface)(resp.jsonSchema, responseExtend);
             const rin = responseInterfaceName + (responses.length > 0 ? responses.length : '');
             const response = await json2ts.compile(resp.jsonSchema, rin, {
                 bannerComment: ``,
@@ -177,6 +135,7 @@ class Generator {
             responses.push(response);
         }
         return {
+            id,
             method,
             path,
             name,
@@ -189,6 +148,30 @@ class Generator {
             paramsName: paramsInterfaceName,
             responseNames
         };
+    }
+    /** 对相同 basename 的接口, 增加序号后缀
+     *
+     * @description 注: 相同path的, 给定相同的 basename (用于检查后端定义的接口地址是否重复)
+     */
+    transformDuplicateApiNames(maps) {
+        const total = (0, array_grouping_1.GroupBy)(maps, (a, b) => {
+            return a.basename === b.basename;
+        });
+        for (const children of total) {
+            if (children.length > 1) {
+                const dupNameGroup = (0, array_grouping_1.GroupBy)(children, (a, b) => a.path === b.path);
+                if (dupNameGroup.length === 1)
+                    continue;
+                let n = 0;
+                for (const cs of dupNameGroup) {
+                    for (const c of cs) {
+                        // maps.find((m) => m.id === c.id).basename += n
+                        c.basename += n;
+                    }
+                    n++;
+                }
+            }
+        }
     }
     /** 基于模板生成文件结构 */
     generateHeader(folderName) {

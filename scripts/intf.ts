@@ -100,6 +100,7 @@ export interface IDetail {
 }
 
 export interface IApiOriginInfo {
+    id: number
     method: string
     path: string
     name: string

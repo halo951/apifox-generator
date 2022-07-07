@@ -251,6 +251,11 @@ argparse@^2.0.1:
   resolved "https://registry.npmmirror.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
   integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
 
+array-grouping@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.npmjs.org/array-grouping/-/array-grouping-1.0.8.tgz#9b4645e7bc4e0b2a15c44e78c1bacabad9cc66d6"
+  integrity sha512-82WGv8E1rEnDkby81SSCa2d8c2Se6vOxrOCFdNZtVK/gQXSnLRJ69+Jc4hUWodEsySZabLCk6cVcjDuLilDosw==
+
 array-union@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmmirror.com/array-union/-/array-union-2.1.0.tgz#b798420adbeb1de828d84acd8a2e23d3efe85e8d"

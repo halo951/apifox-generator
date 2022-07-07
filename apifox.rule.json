@@ -1,6 +1,7 @@
 {
+    "outDir": "./.temp/",
     "requestTemplate": {
-        "name": "basic axios",
+        "name": "request util",
         "headerComment": [
             "/** 接口集合 - [folder name]",
             " *",
@@ -10,10 +11,35 @@
             " */",
             ""
         ],
-        "importSyntax": "import axios from 'axios'",
-        "requestUtil": "axios",
-        "responseExtend": null,
+        "importSyntax": "import { request, IResponse } from '@/utils/request'",
+        "requestUtil": "request",
+        "responseExtend": "IResponse",
         "globalParamsKey": [],
         "globalResponseKey": []
-    }
+    },
+    "projectId": "1225216",
+    "floders": [
+        {
+            "id": 5596438,
+            "name": "工单",
+            "mapFile": "workorder"
+        },
+        {
+            "id": 5596443,
+            "name": "专项任务",
+            "mapFile": "special-task"
+        },
+        {
+            "id": 5596450,
+            "name": "安全检查",
+            "mapFile": "security-check"
+        }
+    ],
+    "usage": [
+        {
+            "id": 5596443,
+            "name": "专项任务",
+            "mapFile": "special-task"
+        }
+    ]
 }

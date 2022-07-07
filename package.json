@@ -11,7 +11,7 @@
         "api-gen": "./bin/cli"
     },
     "scripts": {
-        "test": "tsc && api-gen"
+        "test": "tsc && node ./bin/cli"
     },
     "dependencies": {
         "@types/fs-extra": "^9.0.13",
@@ -19,6 +19,7 @@
         "@typescript-eslint/eslint-plugin": "^5.30.5",
         "@typescript-eslint/parser": "^5.30.5",
         "add": "^2.0.6",
+        "array-grouping": "^1.0.8",
         "axios": "^0.27.2",
         "dayjs": "^1.11.3",
         "eslint": "^8.19.0",
