@@ -1,6 +1,6 @@
 {
     "name": "apifox-generator",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "generate project apis file by apifox agreement",
     "keywords": [
         "api generator",
