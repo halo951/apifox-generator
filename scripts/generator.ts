@@ -186,10 +186,12 @@ export class Generator {
         let context: string = ''
         for (const info of maps) {
             // 添加 params interface
-            context += `/** params interface | ${info.name} */`
-            context += '\n'
-            context += info.params
-            context += '\n'
+            if (info.hasParams) {
+                context += `/** params interface | ${info.name} */`
+                context += '\n'
+                context += info.params
+                context += '\n'
+            }
             // 添加 response interface
             context += `/** response interface | ${info.name} */`
             context += '\n'
