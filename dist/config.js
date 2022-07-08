@@ -209,11 +209,15 @@ class ConfigLoader {
         })));
         console.log('> 配置接口命名映射');
         for (const item of list) {
+            const old = this.config.usage.find((u) => u.id === item.id);
             // ? 已配置过的, 跳过
-            if (this.config.usage.find((u) => u.id === item.id))
-                continue;
-            const mapFile = await (0, input_1.inputText)(`配置接口映射文件名: (接口: ${item.name})`);
-            item.mapFile = mapFile;
+            if (old) {
+                item.mapFile = old.mapFile;
+            }
+            else {
+                const mapFile = await (0, input_1.inputText)(`配置接口映射文件名: (接口: ${item.name})`);
+                item.mapFile = mapFile;
+            }
         }
         this.config.usage = list;
         this.updateConfig();
