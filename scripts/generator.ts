@@ -151,8 +151,17 @@ export class Generator {
                 let n = 0
                 for (const cs of dupNameGroup) {
                     for (const c of cs) {
-                        // maps.find((m) => m.id === c.id).basename += n
                         c.basename += n
+                        c.params += n
+                        c.responses = c.responses.map((resp) => {
+                            if (/([0-9])$/.test(resp)) {
+                                return resp.replace(/([0-9])$/, (_, $1: string): string => {
+                                    return (Number($1) + n).toString()
+                                })
+                            } else {
+                                return resp + n
+                            }
+                        })
                     }
                     n++
                 }
