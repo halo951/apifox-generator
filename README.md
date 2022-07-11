@@ -45,15 +45,17 @@ api-gen -q
 
 -   requestTemplate
 
-| 配置项            | 描述                                       | 可选/默认值                                           | 备注                                                                           |
-| ----------------- | ------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------ |
-| name              | 模板名                                     | 'request util', 'basic axios'                         |                                                                                |
-| headerComment     | 文件头部注释                               |                                                       |                                                                                |
-| importSyntax      | 请求工具导入语句                           | `import {request, IResponse} from '@/utils/request' ` |                                                                                |
-| requestUtil       | 请求工具(使用 axios 或在 axios 基础上扩展) | request / axios                                       | 注意于请求语句对应, 如果使用其他的请求工具, 至少需要具备 `req.post` 等请求方法 |
-| responseExtend    | 响应值继承的全局响应接口                   | IResponse                                             | 注意于请求语句对应                                                             |
-| globalParamsKey   | 全局参数字段名                             | Array<string>                                         | 一般需要生成后, 二次配置                                                       |
-| globalResponseKey | 全局响应值字段名                           | Array<string>                                         | 一般需要生成后, 二次配置                                                       |
+| 配置项               | 描述                                       | 可选/默认值                                           | 备注                                                                           |
+| -------------------- | ------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------ | --- |
+| name                 | 模板名                                     | 'request util', 'basic axios'                         |                                                                                |
+| headerComment        | 文件头部注释                               |                                                       |                                                                                |
+| importSyntax         | 请求工具导入语句                           | `import {request, IResponse} from '@/utils/request' ` |                                                                                |
+| requestUtil          | 请求工具(使用 axios 或在 axios 基础上扩展) | request / axios                                       | 注意于请求语句对应, 如果使用其他的请求工具, 至少需要具备 `req.post` 等请求方法 |
+| responseExtend       | 响应值继承的全局响应接口                   | IResponse                                             | 注意于请求语句对应                                                             |
+| globalParamsKey      | 全局参数字段名                             | Array<string>                                         | 一般需要生成后, 二次配置                                                       |
+| globalResponseKey    | 全局响应值字段名                           | Array<string>                                         | 一般需要生成后, 二次配置                                                       |
+| globalParamsFilter   | 全局参数字段过滤方式                       | 'delete'                                              | 'unrequire'                                                                    |     |
+| globalResponseFilter | 全局响应字段过滤方式                       | 'delete'                                              | 'unrequire'                                                                    |     |
 
 ## 高阶用法
 
