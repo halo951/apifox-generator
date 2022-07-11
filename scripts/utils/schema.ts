@@ -1,4 +1,9 @@
-export const transform = (schema: any, globalKey: Array<any>): void => {
+export const transform = (
+    schema: any,
+    globalKey: Array<any>,
+    globalHandleType: 'delete' | 'unrequire',
+    deep: number = 0
+): void => {
     for (const key in schema) {
         // add additionalProperties at false
         if (key === 'type') schema['additionalProperties'] = false
@@ -8,8 +13,12 @@ export const transform = (schema: any, globalKey: Array<any>): void => {
                 const prop = schema['properties'][k]
 
                 // remove global key
-                if (globalKey.includes(k)) {
-                    delete schema['properties'][k]
+                if (deep === 0 && globalKey.includes(k)) {
+                    if (globalHandleType === 'delete') {
+                        delete schema['properties'][k]
+                    } else {
+                        schema['required'] = schema['required'].filter((key) => key !== k)
+                    }
                 }
                 // title to description
                 if (prop.title) {
@@ -23,7 +32,7 @@ export const transform = (schema: any, globalKey: Array<any>): void => {
             }
         }
         // deep object
-        if (typeof schema[key] === 'object') transform(schema[key], globalKey)
+        if (typeof schema[key] === 'object') transform(schema[key], globalKey, globalHandleType, deep + 1)
     }
 }
 

@@ -18,6 +18,8 @@ export interface IConfig {
         responseExtend: string | null
         globalParamsKey: Array<string>
         globalResponseKey: Array<string>
+        globalParamsFilter: 'delete' | 'unrequire'
+        globalResponseFilter: 'delete' | 'unrequire'
     }
 }
 export interface ITreeNode {

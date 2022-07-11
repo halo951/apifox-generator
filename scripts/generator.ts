@@ -99,7 +99,8 @@ export class Generator {
     /** 转换元数据为生成接口需要的信息 */
     async transformApiInfo(detail: IDetail, duplicate: { [key: string]: number }): Promise<IApiOriginInfo> {
         const { id, method, path, name, createdAt, updatedAt } = detail
-        const { globalParamsKey, globalResponseKey, responseExtend } = this.config.requestTemplate
+        const { globalParamsKey, globalResponseKey, responseExtend, globalParamsFilter, globalResponseFilter } =
+            this.config.requestTemplate
         const basename: string = formatNameSuffixByDuplicate(formatToHump(np.basename(path)), duplicate)
         const paramsInterfaceName: string = formatNameSuffixByDuplicate(
             formatInterfaceName(np.basename(path), 'Params'),
@@ -107,7 +108,7 @@ export class Generator {
         )
         const responseInterfaceName: string = formatInterfaceName(np.basename(path), 'Response')
 
-        transform(detail.requestBody.jsonSchema, globalParamsKey)
+        transform(detail.requestBody.jsonSchema, globalParamsKey, globalParamsFilter)
         let params: string | null = ''
 
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
@@ -125,7 +126,7 @@ export class Generator {
         const responses = []
 
         for (const resp of detail.responses) {
-            transform(resp.jsonSchema, globalResponseKey)
+            transform(resp.jsonSchema, globalResponseKey, globalResponseFilter)
             appendParentInterface(resp.jsonSchema, responseExtend)
             const rin: string = formatNameSuffixByDuplicate(responseInterfaceName, duplicate)
 

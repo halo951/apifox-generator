@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.appendParentInterface = exports.transform = void 0;
-const transform = (schema, globalKey) => {
+const transform = (schema, globalKey, globalHandleType) => {
     for (const key in schema) {
         // add additionalProperties at false
         if (key === 'type')
@@ -11,7 +11,12 @@ const transform = (schema, globalKey) => {
                 const prop = schema['properties'][k];
                 // remove global key
                 if (globalKey.includes(k)) {
-                    delete schema['properties'][k];
+                    if (globalHandleType === 'delete') {
+                        delete schema['properties'][k];
+                    }
+                    else {
+                        schema['required'] = schema['required'].filter((key) => key !== k);
+                    }
                 }
                 // title to description
                 if (prop.title) {
@@ -27,7 +32,7 @@ const transform = (schema, globalKey) => {
         }
         // deep object
         if (typeof schema[key] === 'object')
-            (0, exports.transform)(schema[key], globalKey);
+            (0, exports.transform)(schema[key], globalKey, globalHandleType);
     }
 };
 exports.transform = transform;
