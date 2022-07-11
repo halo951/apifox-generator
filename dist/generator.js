@@ -62,13 +62,15 @@ class Generator {
         for (const { id, name, mapFile } of usage) {
             // 从 treeNode 中, 拿到当前 folder 的子集
             const apis = this.findApisByFolder(treeNode, id);
+            this.checkDuplicatePath(apis);
+            /** 定义用于记录重复命名的 方法名, 参数接口名, 响应接口名 */
+            const duplicate = {};
             // 转换为接口生成需要的信息
             const maps = [];
-            for (const { detail } of apis) {
-                const info = await this.transformApiInfo(detail);
+            for (const api of apis) {
+                const info = await this.transformApiInfo(api, duplicate);
                 maps.push(info);
             }
-            this.transformDuplicateApiNames(maps);
             // 生成文件头
             const header = this.generateHeader(name);
             // 生成文件内容
@@ -93,19 +95,35 @@ class Generator {
                 }
                 else {
                     const detail = this.details.find((d) => d.id === api.api.id);
-                    apis.push({ node: api, detail });
+                    apis.push(detail);
                 }
             }
         }
         return apis;
     }
+    /** 检查 apis 集合内, 是否存在完全相同的 path  */
+    checkDuplicatePath(apis) {
+        const grouped = (0, array_grouping_1.GroupBy)(apis, (a, b) => a.path === b.path);
+        const errMsgs = grouped.reduce((errMsgs, g) => {
+            if (g.length > 1) {
+                errMsgs.push(`> 存在相同接口定义: ${g[0].path}`);
+            }
+            return errMsgs;
+        }, []);
+        if (errMsgs.length > 0) {
+            console.log('\n>>>>>>>>>>>>>>>>>>>>>>>>\n');
+            console.log(errMsgs.join('\n'));
+            console.log('\n<<<<<<<<<<<<<<<<<<<<<<<<\n');
+            process.exit(-1);
+        }
+    }
     /** 转换元数据为生成接口需要的信息 */
-    async transformApiInfo(detail) {
+    async transformApiInfo(detail, duplicate) {
         const { id, method, path, name, createdAt, updatedAt } = detail;
         const { globalParamsKey, globalResponseKey, responseExtend } = this.config.requestTemplate;
-        const basename = (0, format_1.formatToHump)(np.basename(path));
-        const paramsInterfaceName = (0, format_1.formatInterfaceName)(np.basename(path), 'Params');
-        let responseInterfaceName = (0, format_1.formatInterfaceName)(np.basename(path), 'Response');
+        const basename = (0, format_1.formatNameSuffixByDuplicate)((0, format_1.formatToHump)(np.basename(path)), duplicate);
+        const paramsInterfaceName = (0, format_1.formatNameSuffixByDuplicate)((0, format_1.formatInterfaceName)(np.basename(path), 'Params'), duplicate);
+        const responseInterfaceName = (0, format_1.formatInterfaceName)(np.basename(path), 'Response');
         (0, schema_1.transform)(detail.requestBody.jsonSchema, globalParamsKey);
         let params = '';
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
@@ -124,7 +142,7 @@ class Generator {
         for (const resp of detail.responses) {
             (0, schema_1.transform)(resp.jsonSchema, globalResponseKey);
             (0, schema_1.appendParentInterface)(resp.jsonSchema, responseExtend);
-            const rin = responseInterfaceName + (responses.length > 0 ? responses.length : '');
+            const rin = (0, format_1.formatNameSuffixByDuplicate)(responseInterfaceName, duplicate);
             const response = await json2ts.compile(resp.jsonSchema, rin, {
                 bannerComment: ``,
                 unreachableDefinitions: true,
@@ -148,40 +166,6 @@ class Generator {
             paramsName: paramsInterfaceName,
             responseNames
         };
-    }
-    /** 对相同 basename 的接口, 增加序号后缀
-     *
-     * @description 注: 相同path的, 给定相同的 basename (用于检查后端定义的接口地址是否重复)
-     */
-    transformDuplicateApiNames(maps) {
-        const total = (0, array_grouping_1.GroupBy)(maps, (a, b) => {
-            return a.basename === b.basename;
-        });
-        for (const children of total) {
-            if (children.length > 1) {
-                const dupNameGroup = (0, array_grouping_1.GroupBy)(children, (a, b) => a.path === b.path);
-                if (dupNameGroup.length === 1)
-                    continue;
-                let n = 0;
-                for (const cs of dupNameGroup) {
-                    for (const c of cs) {
-                        c.basename += n;
-                        c.params += n;
-                        c.responses = c.responses.map((resp) => {
-                            if (/([0-9])$/.test(resp)) {
-                                return resp.replace(/([0-9])$/, (_, $1) => {
-                                    return (Number($1) + n).toString();
-                                });
-                            }
-                            else {
-                                return resp + n;
-                            }
-                        });
-                    }
-                    n++;
-                }
-            }
-        }
     }
     /** 基于模板生成文件结构 */
     generateHeader(folderName) {

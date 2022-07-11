@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import * as np from 'path'
 import * as json2ts from 'json-schema-to-typescript'
+import chalk from 'chalk'
 
 import prettier from 'prettier'
 import dayjs from 'dayjs'
@@ -12,7 +13,7 @@ import { IConfig, IDetail, ITreeNode, IApiOriginInfo } from './intf'
 
 import prettierConfig from './data/prettier.config'
 import { transform, appendParentInterface } from './utils/schema'
-import { formatInterfaceName, formatToHump } from './utils/format'
+import { formatInterfaceName, formatNameSuffixByDuplicate, formatToHump } from './utils/format'
 
 /** 基于 apifox 定义的接口生成器逻辑 */
 export class Generator {
@@ -39,14 +40,16 @@ export class Generator {
         // ? 遍历并生成文件集合
         for (const { id, name, mapFile } of usage) {
             // 从 treeNode 中, 拿到当前 folder 的子集
-            const apis: Array<{ node: ITreeNode; detail: IDetail }> = this.findApisByFolder(treeNode, id)
+            const apis: Array<IDetail> = this.findApisByFolder(treeNode, id)
+            this.checkDuplicatePath(apis)
+            /** 定义用于记录重复命名的 方法名, 参数接口名, 响应接口名 */
+            const duplicate: { [key: string]: number } = {}
             // 转换为接口生成需要的信息
             const maps: Array<IApiOriginInfo> = []
-            for (const { detail } of apis) {
-                const info = await this.transformApiInfo(detail)
+            for (const api of apis) {
+                const info = await this.transformApiInfo(api, duplicate)
                 maps.push(info)
             }
-            this.transformDuplicateApiNames(maps)
             // 生成文件头
             const header: string = this.generateHeader(name)
             // 生成文件内容
@@ -59,11 +62,8 @@ export class Generator {
     }
 
     /** 从treeNode中, 获取folder下所有接口集合 */
-    findApisByFolder(treeNode: Array<ITreeNode>, id?: number): Array<{ node: ITreeNode; detail: IDetail }> {
-        let apis: Array<{
-            node: ITreeNode
-            detail: IDetail
-        }> = []
+    findApisByFolder(treeNode: Array<ITreeNode>, id?: number): Array<IDetail> {
+        let apis: Array<IDetail> = []
         for (const node of treeNode) {
             if (id && node.folder?.id !== id) continue
             for (const api of node.children) {
@@ -72,20 +72,40 @@ export class Generator {
                     apis = apis.concat(children)
                 } else {
                     const detail: IDetail = this.details.find((d) => d.id === api.api.id)
-                    apis.push({ node: api, detail })
+                    apis.push(detail)
                 }
             }
         }
         return apis
     }
 
+    /** 检查 apis 集合内, 是否存在完全相同的 path  */
+    checkDuplicatePath(apis: Array<IDetail>): void {
+        const grouped: Array<Array<IDetail>> = GroupBy(apis, (a, b) => a.path === b.path)
+        const errMsgs: Array<string> = grouped.reduce((errMsgs: Array<string>, g) => {
+            if (g.length > 1) {
+                errMsgs.push(`> 存在相同接口定义: ${g[0].path}`)
+            }
+            return errMsgs
+        }, [])
+        if (errMsgs.length > 0) {
+            console.log('\n>>>>>>>>>>>>>>>>>>>>>>>>\n')
+            console.log(errMsgs.join('\n'))
+            console.log('\n<<<<<<<<<<<<<<<<<<<<<<<<\n')
+            process.exit(-1)
+        }
+    }
+
     /** 转换元数据为生成接口需要的信息 */
-    async transformApiInfo(detail: IDetail): Promise<IApiOriginInfo> {
+    async transformApiInfo(detail: IDetail, duplicate: { [key: string]: number }): Promise<IApiOriginInfo> {
         const { id, method, path, name, createdAt, updatedAt } = detail
         const { globalParamsKey, globalResponseKey, responseExtend } = this.config.requestTemplate
-        const basename: string = formatToHump(np.basename(path))
-        const paramsInterfaceName: string = formatInterfaceName(np.basename(path), 'Params')
-        let responseInterfaceName: string = formatInterfaceName(np.basename(path), 'Response')
+        const basename: string = formatNameSuffixByDuplicate(formatToHump(np.basename(path)), duplicate)
+        const paramsInterfaceName: string = formatNameSuffixByDuplicate(
+            formatInterfaceName(np.basename(path), 'Params'),
+            duplicate
+        )
+        const responseInterfaceName: string = formatInterfaceName(np.basename(path), 'Response')
 
         transform(detail.requestBody.jsonSchema, globalParamsKey)
         let params: string | null = ''
@@ -107,7 +127,7 @@ export class Generator {
         for (const resp of detail.responses) {
             transform(resp.jsonSchema, globalResponseKey)
             appendParentInterface(resp.jsonSchema, responseExtend)
-            const rin: string = responseInterfaceName + (responses.length > 0 ? responses.length : '')
+            const rin: string = formatNameSuffixByDuplicate(responseInterfaceName, duplicate)
 
             const response = await json2ts.compile(resp.jsonSchema, rin, {
                 bannerComment: ``,
@@ -132,40 +152,6 @@ export class Generator {
             responses: responses,
             paramsName: paramsInterfaceName,
             responseNames
-        }
-    }
-
-    /** 对相同 basename 的接口, 增加序号后缀
-     *
-     * @description 注: 相同path的, 给定相同的 basename (用于检查后端定义的接口地址是否重复)
-     */
-    transformDuplicateApiNames(maps: Array<IApiOriginInfo>): void {
-        const total: Array<Array<IApiOriginInfo>> = GroupBy(maps, (a, b) => {
-            return a.basename === b.basename
-        })
-
-        for (const children of total) {
-            if (children.length > 1) {
-                const dupNameGroup = GroupBy(children, (a, b) => a.path === b.path)
-                if (dupNameGroup.length === 1) continue
-                let n = 0
-                for (const cs of dupNameGroup) {
-                    for (const c of cs) {
-                        c.basename += n
-                        c.params += n
-                        c.responses = c.responses.map((resp) => {
-                            if (/([0-9])$/.test(resp)) {
-                                return resp.replace(/([0-9])$/, (_, $1: string): string => {
-                                    return (Number($1) + n).toString()
-                                })
-                            } else {
-                                return resp + n
-                            }
-                        })
-                    }
-                    n++
-                }
-            }
         }
     }
 
