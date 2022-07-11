@@ -274,6 +274,14 @@ class ConfigLoader {
                  */
         `)
             .split('\n');
+        const globalParamsFilter = await (0, input_1.inputSelect)('选择参数字段全局变量过滤方式 (params)', [
+            { title: 'delete', value: 'delete' },
+            { title: 'unrequire', value: 'unrequire' }
+        ]);
+        const globalResponseFilter = await (0, input_1.inputSelect)('选择参数字段全局变量过滤方式 (response)', [
+            { title: 'delete', value: 'delete' },
+            { title: 'unrequire', value: 'unrequire' }
+        ]);
         if (plan === 'request util') {
             this.config.requestTemplate = {
                 name: 'request util',
@@ -282,7 +290,9 @@ class ConfigLoader {
                 requestUtil: 'request',
                 responseExtend: 'IResponse',
                 globalParamsKey: [],
-                globalResponseKey: []
+                globalResponseKey: [],
+                globalParamsFilter,
+                globalResponseFilter
             };
         }
         else {
@@ -293,7 +303,9 @@ class ConfigLoader {
                 requestUtil: 'axios',
                 responseExtend: null,
                 globalParamsKey: [],
-                globalResponseKey: []
+                globalResponseKey: [],
+                globalParamsFilter,
+                globalResponseFilter
             };
         }
         this.updateConfig();

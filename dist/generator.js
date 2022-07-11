@@ -120,11 +120,11 @@ class Generator {
     /** 转换元数据为生成接口需要的信息 */
     async transformApiInfo(detail, duplicate) {
         const { id, method, path, name, createdAt, updatedAt } = detail;
-        const { globalParamsKey, globalResponseKey, responseExtend } = this.config.requestTemplate;
+        const { globalParamsKey, globalResponseKey, responseExtend, globalParamsFilter, globalResponseFilter } = this.config.requestTemplate;
         const basename = (0, format_1.formatNameSuffixByDuplicate)((0, format_1.formatToHump)(np.basename(path)), duplicate);
         const paramsInterfaceName = (0, format_1.formatNameSuffixByDuplicate)((0, format_1.formatInterfaceName)(np.basename(path), 'Params'), duplicate);
         const responseInterfaceName = (0, format_1.formatInterfaceName)(np.basename(path), 'Response');
-        (0, schema_1.transform)(detail.requestBody.jsonSchema, globalParamsKey, 'unrequire');
+        (0, schema_1.transform)(detail.requestBody.jsonSchema, globalParamsKey, globalParamsFilter);
         let params = '';
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
             params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, {
@@ -140,7 +140,7 @@ class Generator {
         const responseNames = [];
         const responses = [];
         for (const resp of detail.responses) {
-            (0, schema_1.transform)(resp.jsonSchema, globalResponseKey, 'delete');
+            (0, schema_1.transform)(resp.jsonSchema, globalResponseKey, globalResponseFilter);
             (0, schema_1.appendParentInterface)(resp.jsonSchema, responseExtend);
             const rin = (0, format_1.formatNameSuffixByDuplicate)(responseInterfaceName, duplicate);
             const response = await json2ts.compile(resp.jsonSchema, rin, {
