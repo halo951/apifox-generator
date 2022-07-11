@@ -13,6 +13,10 @@
     "scripts": {
         "test": "tsc && node ./bin/cli"
     },
+    "repository": {
+        "type": "github",
+        "url": "https://github.com/halo951/apifox-generator.git"
+    },
     "dependencies": {
         "@types/fs-extra": "^9.0.13",
         "@types/minimist": "^1.2.2",
