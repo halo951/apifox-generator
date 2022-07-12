@@ -1,5 +1,12 @@
 import { ESLint } from 'eslint';
 import { IConfig, IDetail, ITreeNode, IApiOriginInfo } from './intf';
+declare type TCache = Array<{
+    moduleName: string;
+    comment: string;
+    mapFile: string;
+    header: string;
+    context: string;
+}>;
 /** 基于 apifox 定义的接口生成器逻辑 */
 export declare class Generator {
     config: IConfig;
@@ -18,6 +25,9 @@ export declare class Generator {
     generateHeader(folderName: string): string;
     /** 生成文件内容 */
     generateContext(name: string, maps: Array<IApiOriginInfo>): string;
+    /** 生成公共的导出文件 */
+    generateIndexFile(cache: TCache): string;
     /** 输出文件 */
     outputFile(outDir: string, mapFile: string, header: string, context: string): Promise<void>;
 }
+export {};

@@ -48,6 +48,14 @@ export class ConfigLoader {
         const upgraded: boolean = this.upgradeConfigFolders(folders)
         // 如果不存在选中接口范围, 用户输入
         await this.selectUsageApiDoc(upgraded)
+
+        // 配置是否添加 index.ts
+        if (this.config.appendIndexFile === undefined) {
+            const append: boolean = await inputConfirm('是否添加 index.ts 作为公共导出文件?')
+            this.config.appendIndexFile = append
+            this.updateConfig()
+        }
+
         return {
             config: this.config,
             treeNode,

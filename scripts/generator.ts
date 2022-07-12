@@ -15,6 +15,8 @@ import prettierConfig from './data/prettier.config'
 import { transform, appendParentInterface } from './utils/schema'
 import { formatInterfaceName, formatNameSuffixByDuplicate, formatToHump } from './utils/format'
 
+type TCache = Array<{ moduleName: string; comment: string; mapFile: string; header: string; context: string }>
+
 /** 基于 apifox 定义的接口生成器逻辑 */
 export class Generator {
     config!: IConfig
@@ -35,7 +37,7 @@ export class Generator {
         this.config = config
         this.details = details
         const { outDir, usage } = config
-        const cache: Array<{ mapFile: string; header: string; context: string }> = []
+        const cache: TCache = []
 
         // ? 遍历并生成文件集合
         for (const { id, name, mapFile } of usage) {
@@ -55,10 +57,14 @@ export class Generator {
             // 生成文件内容
             const context: string = this.generateContext(name, maps)
             // 存入缓冲区
-            cache.push({ mapFile, header, context })
+            cache.push({ moduleName: np.basename(mapFile), comment: name, mapFile, header, context })
         }
         // 输出文件
         for (const c of cache) await this.outputFile(outDir, c.mapFile, c.header, c.context)
+        // 导出接口公共出口文件
+        if (this.config.appendIndexFile) {
+            this.outputFile(outDir, 'index.ts', this.generateIndexFile(cache), '')
+        }
     }
 
     /** 从treeNode中, 获取folder下所有接口集合 */
@@ -232,6 +238,24 @@ export class Generator {
             return `/** ${$1} */`
         })
         return context
+    }
+
+    /** 生成公共的导出文件 */
+    generateIndexFile(cache: TCache): string {
+        const imports: Array<string> = cache.map((c) => {
+            return `import * as ${formatToHump(c.moduleName)} from './${c.moduleName}'`
+        })
+        const modules: Array<string> = cache.map((c) => {
+            return [`/** ${c.comment} */`, formatToHump(c.moduleName)].join('\n')
+        })
+        return `
+        ${imports.join('\n')}
+        
+        /** apis 接口集合 */
+        export const apis = {
+            ${modules.join(',\n')}
+        }
+        `.trim()
     }
 
     /** 输出文件 */

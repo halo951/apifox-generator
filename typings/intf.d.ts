@@ -3,6 +3,8 @@ export interface IConfig {
     projectId?: string;
     /** 登录token */
     Authorization?: string;
+    /** 是否添加 index.ts 用于统一导出配置 */
+    appendIndexFile?: boolean;
     floders: Array<{
         id: number;
         name: string;

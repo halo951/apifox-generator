@@ -3,6 +3,8 @@ export interface IConfig {
     projectId?: string
     /** 登录token */
     Authorization?: string
+    /** 是否添加 index.ts 用于统一导出配置 */
+    appendIndexFile?: boolean
     /* 可用接口集合 (用于校验本地配置规则与apifox文档对比是否一致, 避免出现新增接口文件夹, 本地不更新情况) */
     floders: Array<{ id: number; name: string }>
     /** 需要映射的接口 */

@@ -76,11 +76,15 @@ class Generator {
             // 生成文件内容
             const context = this.generateContext(name, maps);
             // 存入缓冲区
-            cache.push({ mapFile, header, context });
+            cache.push({ moduleName: np.basename(mapFile), comment: name, mapFile, header, context });
         }
         // 输出文件
         for (const c of cache)
             await this.outputFile(outDir, c.mapFile, c.header, c.context);
+        // 导出接口公共出口文件
+        if (this.config.appendIndexFile) {
+            this.outputFile(outDir, 'index.ts', this.generateIndexFile(cache), '');
+        }
     }
     /** 从treeNode中, 获取folder下所有接口集合 */
     findApisByFolder(treeNode, id) {
@@ -241,6 +245,23 @@ class Generator {
             return `/** ${$1} */`;
         });
         return context;
+    }
+    /** 生成公共的导出文件 */
+    generateIndexFile(cache) {
+        const imports = cache.map((c) => {
+            return `import * as ${(0, format_1.formatToHump)(c.moduleName)} from './${c.moduleName}'`;
+        });
+        const modules = cache.map((c) => {
+            return [`/** ${c.comment} */`, (0, format_1.formatToHump)(c.moduleName)].join('\n');
+        });
+        return `
+        ${imports.join('\n')}
+        
+        /** apis 接口集合 */
+        export const apis = {
+            ${modules.join(',\n')}
+        }
+        `.trim();
     }
     /** 输出文件 */
     async outputFile(outDir, mapFile, header, context) {
