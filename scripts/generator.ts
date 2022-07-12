@@ -72,7 +72,7 @@ export class Generator {
                     apis = apis.concat(children)
                 } else {
                     const detail: IDetail = this.details.find((d) => d.id === api.api.id)
-                    apis.push(detail)
+                    if (detail.status !== 'deprecated') apis.push(detail)
                 }
             }
         }
@@ -115,8 +115,10 @@ export class Generator {
             params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, {
                 bannerComment: ``,
                 unreachableDefinitions: true,
-                declareExternallyReferenced: true,
-                ignoreMinAndMaxItems: true
+                // declareExternallyReferenced: true,
+                enableConstEnums: true,
+                ignoreMinAndMaxItems: true,
+                strictIndexSignatures: true,
             })
         } else {
             params = null
