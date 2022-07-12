@@ -130,11 +130,10 @@ class Generator {
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
             params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, {
                 bannerComment: ``,
-                unreachableDefinitions: true,
-                // declareExternallyReferenced: true,
+                unreachableDefinitions: false,
                 enableConstEnums: true,
-                ignoreMinAndMaxItems: true,
-                strictIndexSignatures: true,
+                strictIndexSignatures: false,
+                declareExternallyReferenced: true
             });
         }
         else {

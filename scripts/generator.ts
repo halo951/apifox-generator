@@ -109,16 +109,16 @@ export class Generator {
         const responseInterfaceName: string = formatInterfaceName(np.basename(path), 'Response')
 
         transform(detail.requestBody.jsonSchema, globalParamsKey, globalParamsFilter)
+
         let params: string | null = ''
 
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
             params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, {
                 bannerComment: ``,
-                unreachableDefinitions: true,
-                // declareExternallyReferenced: true,
+                unreachableDefinitions: false,
                 enableConstEnums: true,
-                ignoreMinAndMaxItems: true,
-                strictIndexSignatures: true,
+                strictIndexSignatures: false,
+                declareExternallyReferenced: true
             })
         } else {
             params = null
@@ -131,7 +131,6 @@ export class Generator {
             transform(resp.jsonSchema, globalResponseKey, globalResponseFilter)
             appendParentInterface(resp.jsonSchema, responseExtend)
             const rin: string = formatNameSuffixByDuplicate(responseInterfaceName, duplicate)
-
             const response = await json2ts.compile(resp.jsonSchema, rin, {
                 bannerComment: ``,
                 unreachableDefinitions: true,
