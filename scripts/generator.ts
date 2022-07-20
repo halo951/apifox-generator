@@ -186,7 +186,8 @@ export class Generator {
     /** 生成文件内容 */
     generateContext(name: string, maps: Array<IApiOriginInfo>): string {
         const { requestUtil } = this.config.requestTemplate
-        let context: string = ''
+        let context: string = '',
+            allowSkipParam: boolean
         for (const info of maps) {
             // 添加 params interface
             if (info.hasParams) {
@@ -195,6 +196,7 @@ export class Generator {
                 context += info.params
                 context += '\n'
             }
+            allowSkipParam = !/[\w]+:/gm.test(info.params)
             // 添加 response interface
             context += `/** response interface | ${info.name} */`
             context += '\n'
@@ -218,7 +220,10 @@ export class Generator {
             // 替换参数
             if (info.hasParams) {
                 requestFunction = requestFunction.replace(/\[params comment\]/, `@param {${info.paramsName}} params`)
-                requestFunction = requestFunction.replace(/\[params\]/, `params: ${info.paramsName}`)
+                requestFunction = requestFunction.replace(
+                    /\[params\]/,
+                    `params${allowSkipParam ? '?' : ''}: ${info.paramsName}`
+                )
             } else {
                 requestFunction = requestFunction.replace(/\[params comment\]/, '')
                 requestFunction = requestFunction.replace(/\[params\]/, ``)

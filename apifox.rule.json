@@ -1,5 +1,5 @@
 {
-    "outDir": "./.temp/",
+    "outDir": "./src/apis/",
     "requestTemplate": {
         "name": "request util",
         "headerComment": [
@@ -14,11 +14,26 @@
         "importSyntax": "import { request, IResponse } from '@/utils/request'",
         "requestUtil": "request",
         "responseExtend": "IResponse",
-        "globalParamsKey": [],
-        "globalResponseKey": []
+        "globalParamsKey": [
+            "user_id",
+            "project_ids",
+            "projectIds",
+            "project_id",
+            "selectedMonth",
+            "pd"
+        ],
+        "globalResponseKey": [],
+        "globalParamsFilter": "unrequire",
+        "globalResponseFilter": "delete"
     },
     "projectId": "1225216",
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjY3NzA1LCJ0cyI6IjQxNDI5ZTc4MGFiNTA0NWYiLCJpYXQiOjE2NTcxODkxNjM5NjB9.yIx4LIXme11Goe88jUjT7jpsRiTd-f6DOrzqxgC24rQ",
     "floders": [
+        {
+            "id": 5747714,
+            "name": "工单(旧)",
+            "mapFile": "owo"
+        },
         {
             "id": 5596438,
             "name": "工单",
@@ -37,9 +52,25 @@
     ],
     "usage": [
         {
+            "id": 5747714,
+            "name": "工单(旧)",
+            "mapFile": "owo"
+        },
+        {
+            "id": 5596438,
+            "name": "工单",
+            "mapFile": "workorder"
+        },
+        {
             "id": 5596443,
             "name": "专项任务",
             "mapFile": "special-task"
+        },
+        {
+            "id": 5596450,
+            "name": "安全检查",
+            "mapFile": "security-check"
         }
-    ]
+    ],
+    "appendIndexFile": true
 }
