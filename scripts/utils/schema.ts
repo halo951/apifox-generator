@@ -17,6 +17,7 @@ export const transform = (
                     if (globalHandleType === 'delete') {
                         delete schema['properties'][k]
                     } else {
+                        schema['description'] = '(全局变量) ' + schema['description']
                         schema['required'] = schema['required'].filter((key) => key !== k)
                     }
                 }
