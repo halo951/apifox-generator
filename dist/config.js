@@ -276,7 +276,6 @@ class ConfigLoader {
                  * 
                  * @apifox [apifox address]
                  * @author apifox-generator
-                 * @date (最后一次更新日期) [last update]
                  */
         `)
             .split('\n');

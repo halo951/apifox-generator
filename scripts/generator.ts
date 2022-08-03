@@ -177,7 +177,6 @@ export class Generator {
         template = template
             .replace(/\[folder name\]/g, folderName)
             .replace(/\[apifox address\]/g, `https://www.apifox.cn/web/project/${this.config.projectId}`)
-            .replace(/\[last update\]/, dayjs().format('YYYY-MM-DD HH:mm'))
         template += '\n\n'
 
         return template

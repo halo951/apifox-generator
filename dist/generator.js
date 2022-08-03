@@ -186,8 +186,7 @@ class Generator {
         template += '\n';
         template = template
             .replace(/\[folder name\]/g, folderName)
-            .replace(/\[apifox address\]/g, `https://www.apifox.cn/web/project/${this.config.projectId}`)
-            .replace(/\[last update\]/, (0, dayjs_1.default)().format('YYYY-MM-DD HH:mm'));
+            .replace(/\[apifox address\]/g, `https://www.apifox.cn/web/project/${this.config.projectId}`);
         template += '\n\n';
         return template;
     }
