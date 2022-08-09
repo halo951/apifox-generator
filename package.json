@@ -1,44 +1,73 @@
 {
     "name": "apifox-generator",
-    "version": "1.1.8",
-    "description": "generate project apis file by apifox agreement",
+    "version": "1.2.0-beta.1",
+    "description": "generate project api maps by apifox agreement",
     "keywords": [
-        "api generator",
-        "apifox"
+        "apifox",
+        "generator"
     ],
     "license": "MIT",
-    "bin": {
-        "api-gen": "./bin/cli"
-    },
-    "scripts": {
-        "test": "tsc && node ./bin/cli -q"
+    "sideEffects": false,
+    "author": {
+        "name": "halo951",
+        "url": "https://github.com/halo951"
     },
     "repository": {
-        "type": "github",
+        "type": "git",
         "url": "https://github.com/halo951/apifox-generator.git"
     },
+    "bugs": {
+        "url": "https://github.com/halo951/apifox-generator/issues"
+    },
+    "main": "./dist/index.js",
+    "typings": "typings/index.d.ts",
+    "bin": {
+        "api-gen1": "./bin/cli"
+    },
+    "scripts": {
+        "clean": "rimraf dist && rimraf typings",
+        "build": "rollup --config ./rollup.config.ts --configPlugin typescript2",
+        "preview": "yarn build && node dist/index.js --loader esm",
+        "lint:fix": "prettier -w **.ts **.md **.json",
+        "test": "jest --coverage"
+    },
     "dependencies": {
-        "@types/fs-extra": "^9.0.13",
-        "@types/minimist": "^1.2.2",
-        "@typescript-eslint/eslint-plugin": "^5.30.5",
-        "@typescript-eslint/parser": "^5.30.5",
-        "add": "^2.0.6",
+        "@typescript-eslint/eslint-plugin": "^5.33.0",
+        "@typescript-eslint/parser": "^5.33.0",
         "array-grouping": "^1.0.8",
         "axios": "^0.27.2",
-        "dayjs": "^1.11.3",
-        "eslint": "^8.19.0",
+        "chalk": "4",
+        "comment-json": "^4.2.2",
+        "dayjs": "^1.11.4",
+        "enquirer": "^2.3.6",
+        "eslint": "^8.21.0",
         "eslint-plugin-prettier": "^4.2.1",
         "fs-extra": "^10.1.0",
-        "get-value": "^3.0.1",
-        "json-schema-to-typescript": "10.1.5",
+        "json-schema-to-typescript": "^11.0.2",
         "minimist": "^1.2.6",
-        "prettier": "^2.7.1",
-        "prompts": "^2.4.2",
-        "yarn": "^1.22.19"
+        "prettier": "^2.6.2",
+        "single-line-log": "^1.1.2",
+        "tslib": "^2.4.0"
     },
     "devDependencies": {
-        "@types/get-value": "^3.0.2",
-        "@types/prompts": "^2.0.14",
+        "@types/eslint": "^8.4.5",
+        "@types/fs-extra": "^9.0.13",
+        "@types/glob": "^7.2.0",
+        "@types/inquirer": "^8.2.1",
+        "@types/jest": "^27.4.1",
+        "@types/minimist": "^1.2.2",
+        "@types/node": "^17.0.25",
+        "@types/rimraf": "^3.0.2",
+        "@types/set-value": "^4.0.1",
+        "@types/single-line-log": "^1.1.0",
+        "glob": "^8.0.3",
+        "jest": "^27.5.1",
+        "rimraf": "^3.0.2",
+        "rollup": "^2.70.2",
+        "rollup-plugin-terser": "^7.0.2",
+        "rollup-plugin-typescript2": "^0.31.2",
+        "ts-jest": "^27.1.4",
+        "ts-node": "^10.9.1",
         "typescript": "^4.7.4"
     }
 }

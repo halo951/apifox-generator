@@ -1,0 +1,31 @@
+/** 获取 prettier 配置 */
+export declare const getPrettierConfig: () => Promise<{
+    semi?: boolean | undefined;
+    singleQuote?: boolean | undefined;
+    jsxSingleQuote?: boolean | undefined;
+    trailingComma?: "none" | "es5" | "all" | undefined;
+    bracketSpacing?: boolean | undefined;
+    bracketSameLine?: boolean | undefined;
+    jsxBracketSameLine?: boolean | undefined;
+    rangeStart?: number | undefined;
+    rangeEnd?: number | undefined;
+    parser?: import("prettier").LiteralUnion<import("prettier").BuiltInParserName, string> | import("prettier").CustomParser | undefined;
+    filepath?: string | undefined;
+    requirePragma?: boolean | undefined;
+    insertPragma?: boolean | undefined;
+    proseWrap?: "preserve" | "always" | "never" | undefined;
+    arrowParens?: "always" | "avoid" | undefined;
+    plugins?: (string | import("prettier").Plugin<any>)[] | undefined;
+    pluginSearchDirs?: false | string[] | undefined;
+    htmlWhitespaceSensitivity?: "css" | "strict" | "ignore" | undefined;
+    endOfLine?: "auto" | "lf" | "crlf" | "cr" | undefined;
+    quoteProps?: "as-needed" | "consistent" | "preserve" | undefined;
+    vueIndentScriptAndStyle?: boolean | undefined;
+    embeddedLanguageFormatting?: "auto" | "off" | undefined;
+    singleAttributePerLine?: boolean | undefined;
+    printWidth?: number | undefined;
+    tabWidth?: number | undefined;
+    useTabs?: boolean | undefined;
+    parentParser?: string | undefined;
+    __embeddedInHtml?: boolean | undefined;
+}>;

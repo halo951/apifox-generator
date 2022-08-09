@@ -1,0 +1,40 @@
+import minimist from 'minimist'
+import { Loader } from './loader'
+import { Configure } from './configure'
+import { Generator } from './generator'
+
+/** Api 映射文件 生成器 */
+export default class ApifoxGenerator {
+    /** 配置加载 & 写入工具 */
+    loader: Loader = new Loader()
+    /** 配置项管理 */
+    configure: Configure = new Configure()
+    /** 代码生成器 */
+    generator: Generator = new Generator()
+
+    async exec(): Promise<void> {
+        const { q: quick, r: reset, init } = minimist(process.argv)
+        let mode: 1 | 2 | 0 = quick ? 1 : reset ? 2 : 0
+        if (init) return this.init()
+        // ? check config is exists from current project.
+        await this.loader.check()
+        // # 读取配置
+        await this.loader.read()
+        // # 配置检查 & 用户输入
+        await this.configure.run(this.loader.config, mode)
+        // # 写入 & 更新配置文件
+        await this.loader.write()
+        // -> 执行 - 生成
+        await this.generator.exec(this.configure)
+    }
+
+    /** 初始化配置项 */
+    async init(): Promise<void> {
+        // # 配置检查 & 用户输入
+        await this.configure.run(this.loader.config, 0)
+        // # 写入 & 更新配置文件
+        await this.loader.write()
+    }
+}
+
+new ApifoxGenerator().exec()
