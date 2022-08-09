@@ -26,7 +26,6 @@ export const transform = (schema: any, globalParams: IGlobalParams, parent?: any
                         delete schema.properties[k]
                     } else {
                         schema.required = schema.required.filter((r: string) => r !== k)
-                        console.log(schema.required)
                         let item = schema.properties[k]
                         if (item.title) {
                             item.title = '(全局变量) ' + item.title ?? ''
