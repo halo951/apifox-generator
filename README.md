@@ -32,49 +32,77 @@ api-gen -q
 
 ## 配置项说明
 
--   apifox.rule.json
+```typescript
+/** 生成模式 */
+export enum EGenerateMode {
+    /** 默认 | 提示是否更新配置 */
+    default = 0,
+    /** 快速生成 | 配置项完全时, 不重复提示配置 */
+    quick = 1,
+    /** 重新配置 */
+    reconfig = 2
+}
 
-| 配置项          | 描述                                   | 获取方式                                      |
-| --------------- | -------------------------------------- | --------------------------------------------- |
-| projectId       | apifox 项目 id                         | 可以从 web 端的 apifox 查看, url 中的最后一段 |
-| Authorization   | 鉴权 token                             | 在 `api-gen` 命令中, 登录即可                 |
-| outDir          | 输出文件目录(不存在则自动创建)         |                                               |
-| folders         | 用于对比 apifox 接口文件夹是否出现变更 | -                                             |
-| usage           | 本地配置的用于生成的接口文件夹集合     | -                                             |
-| requestTemplate | 生成接口请求的配置模板                 |                                               |
+/** 全局参数接口参数配置 */
+export interface IGlobalParams {
+    keys: Array<string>
+    /** 过滤方式
+     *
+     * @type "delete" 从导出参数中, 删除
+     * @type "unrequire" 将必要属性修改为可选属性 (对于处理多种协议格式比较有效)
+     */
+    filter: 'delete' | 'unrequire'
+    /** 是否集成公共响应父类 */
+    extend?: string | null
+}
 
--   requestTemplate
+/** 全局响应接口参数配置 */
+export interface IGlobalResponse extends IGlobalParams {}
 
-| 配置项               | 描述                                       | 可选/默认值                                           | 备注                                                                           |
-| -------------------- | ------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------ | --- |
-| name                 | 模板名                                     | 'request util', 'basic axios'                         |                                                                                |
-| headerComment        | 文件头部注释                               |                                                       |                                                                                |
-| importSyntax         | 请求工具导入语句                           | `import {request, IResponse} from '@/utils/request' ` |                                                                                |
-| requestUtil          | 请求工具(使用 axios 或在 axios 基础上扩展) | request / axios                                       | 注意于请求语句对应, 如果使用其他的请求工具, 至少需要具备 `req.post` 等请求方法 |
-| responseExtend       | 响应值继承的全局响应接口                   | IResponse                                             | 注意于请求语句对应                                                             |
-| globalParamsKey      | 全局参数字段名                             | Array<string>                                         | 一般需要生成后, 二次配置                                                       |
-| globalResponseKey    | 全局响应值字段名                           | Array<string>                                         | 一般需要生成后, 二次配置                                                       |
-| globalParamsFilter   | 全局参数字段过滤方式                       | 'delete'                                              | 'unrequire'                                                                    |     |
-| globalResponseFilter | 全局响应字段过滤方式                       | 'delete'                                              | 'unrequire'                                                                    |     |
+export interface IGenerateTemplate {
+    /** 文件头说明 */
+    header: string | Array<string>
+    /** 使用的请求工具名称 (一般需要继承 axios)
+     * @example
+     * - import [requestUtil] from ...
+     * - [requestUtil].post('', ...)
+     */
+    requestUtil: 'request' | 'axios' | string
+    /** 导入语句格式 */
+    importSyntax: 'import { [requestUtil] } from [utilPath]' | 'import [requestUtil] from [utilPath]'
+    /** 请求工具地址 */
+    utilPath: 'axios' | '@/utils/request' | string
+    /** 全局请求参数变量 */
+    globalRequestParams: IGlobalParams
+    /** 全局响应变量 */
+    globalResponseParams: IGlobalResponse
+}
 
-## 高阶用法
+export interface IApiGroupNameMap {
+    /** id */
+    id: any
+    /** 接口分组名 */
+    name: any
+    /** 映射的文件名 */
+    file: string
+}
 
-> api-gen 的配置文件默认存在于项目根目录下 `apifox.rule.json`, 可根据需要修改默认配置字段
-
-1. 配置修改 or 出错, 如何改动
-
-    - 直接修改配置文件
-    - 在配置文件中, 删除待修改配置, 并重新运行 `api-gen` 命令即可.
-
-2. 改动生成模板规则
-
-    - 模板支持 `request util` 和 `basic axios` 两种类型, 如果更换类型, 请删除现有配置并重新运行 `api-gen` 命令
-    - `name` 属性不要修改, 否则会导致无法按预期模板生成
-    - 继承的`IResponse` 接口, 及 request 工具是可以修改的, 但要与`import syntax` 保持一致.
-    - 如果存在`全局参数`,`公共响应值结构`, 可以通过`globalParamsKey`,`globalResponseKey` 配置, 然后重新生成即可.
-
-3. 接口文件夹变更
-
-    - 这种情况, 一般不需要考虑, 再次生成时, 将会自动对比本地配置, 如果出现改动, 会提示重新配置 `usage(使用的接口)` 属性.
-
-# thanks: [json-schema-to-typescript](https://www.npmjs.com/package/json-schema-to-typescript)
+export interface IConfig {
+    /** 输出目录 */
+    outDir: string
+    /** tk | usage token access apis */
+    token: string
+    /** 项目Id */
+    projectId: string
+    /** 是否添加 index.ts 作为公共出口文件 */
+    appendIndexFile: boolean
+    /* 可用接口集合 (用于校验本地配置规则与apifox文档对比是否一致, 避免出现新增接口文件夹, 本地不更新情况) */
+    folders: TSimpleTrees
+    /** 使用哪些接口 */
+    usage: Array<ISimpleTree>
+    /** 文件名映射 */
+    mapFile: Array<IApiGroupNameMap>
+    /** 生成模板 */
+    template: IGenerateTemplate
+}
+```
