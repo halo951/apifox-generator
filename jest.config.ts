@@ -11,11 +11,14 @@ const config: Config.InitialOptions = {
     collectCoverage: false,
     coverageDirectory: '.coverage',
     coverageReporters: ['html', 'lcov', 'text'],
-    collectCoverageFrom: ['src/**/*.ts'],
+    collectCoverageFrom: ['packages/lib/**/*.ts'],
     // ignore jest
-    coveragePathIgnorePatterns: ['/node_modules/'],
+    coveragePathIgnorePatterns: ['/node_modules/', '/intf/'],
     coverageProvider: 'v8',
     testMatch: ['<rootDir>/__tests__/*.test.ts'],
+    moduleNameMapper: {
+        '^@/(.*?)$': '<rootDir>/lib'
+    },
     rootDir: __dirname
 }
 export default config

@@ -1,5 +1,5 @@
 {
-    "include": ["lib/**/*.ts", "__tests__/**/*.ts", "tree-select-prompt.ts", "lib/utils/TreePrompt.js"],
+    "include": ["lib/**/*.ts", "__tests__/*.ts"],
     "exclude": [],
     "compilerOptions": {
         "lib": ["esnext"],
@@ -8,7 +8,9 @@
         "module": "ESNext",
         "moduleResolution": "node",
         "jsx": "preserve",
-        "paths": {},
+        "paths": {
+            "@/*": ["./lib"]
+        },
         "sourceMap": false,
         "noEmit": true,
         "noEmitHelpers": true,
