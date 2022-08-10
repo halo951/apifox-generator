@@ -15,6 +15,7 @@ import { EMode } from './intf/EMode'
 import { step } from './utils/decorators'
 import { ISimpleTree, TSimpleTrees } from './intf/ISimpleTree'
 import { TreeSelectPrompt } from './utils/tree-select-prompt'
+import { TSchemas } from './intf/ISchema'
 
 /** 处理配置变更, 用户配置项输入 */
 export class Configure {
@@ -28,6 +29,9 @@ export class Configure {
 
     /** 接口信息 | 扁平列表结构 */
     details: TDetils = []
+
+    /** schema集合 | 用于结构映射数据记录 */
+    schemas: TSchemas = []
 
     @step({
         query: 'check and configure generate params',
@@ -76,10 +80,13 @@ export class Configure {
     async pullData(): Promise<void> {
         const res = await apis.treeList(this.config.token, this.config.projectId)
         const res2 = await apis.details(this.config.token, this.config.projectId)
+        const res3 = await apis.schema(this.config.token, this.config.projectId)
         const { data: treeList } = res.data
         const { data: details } = res2.data
+        const { data: schemas } = res3.data
         this.treeList = treeList
         this.details = details
+        this.schemas = schemas
     }
 
     /** 读取 api文件夹集合 */
@@ -130,20 +137,20 @@ export class Configure {
             choices: folders,
             initial: usage,
             header: [
-                '***********************************',
-                '规则:',
+                '********************************************************************************',
+                '生成规则:',
                 ' * 以下规则主要应对apifox文件夹出现多层嵌套的情况',
                 '',
                 ' - 如果一个文件夹下的所有子文件夹被选中, 则接口合并到这个文件夹内',
                 ' - 存在一点局限性, 如果一个文件夹下同时存在接口和文件夹时, 将被当作文件夹处理',
-                '*************************************'
+                '********************************************************************************'
             ].join('\n')
         }).run()
         return res
     }
 
     /** 设置接口别名 (接口文件名) */
-    @step({ query: 'check api name mapping', success: 'check success', failure: 'check failure', exit: true })
+    @step({ query: 'check api name mapping is filled', success: 'adopt', failure: 'unknow excaption', exit: true })
     async upgradeFileNameMap(): Promise<void> {
         if (!this.config.mapFile) this.config.mapFile = []
         const treeToFlatArray = (nodeList: TSimpleTrees): TSimpleTrees => {

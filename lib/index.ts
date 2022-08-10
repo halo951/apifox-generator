@@ -36,5 +36,3 @@ export default class ApifoxGenerator {
         await this.loader.write()
     }
 }
-
-new ApifoxGenerator().exec()

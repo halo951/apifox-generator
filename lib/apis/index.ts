@@ -31,6 +31,11 @@ class Apis {
     async details(token: string, projectId: string): Promise<AxiosResponse<any>> {
         return request({ url: '/api/v1/api-details', headers: { Authorization: token, 'X-Project-Id': projectId } })
     }
+
+    @loading('load schema...')
+    async schema(token: string, projectId: string): Promise<AxiosResponse<any>> {
+        return request({ url: 'api/v1/api-schemas', headers: { Authorization: token, 'X-Project-Id': projectId } })
+    }
 }
 
 export const apis = new Apis()

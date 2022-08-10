@@ -17,6 +17,16 @@ enquirer.use((vm: typeof enquirer) => {
     vm.on('cancel', () => process.exit(0))
 })
 
+const createMessage = (msg: string): Function => {
+    return function (this: any) {
+        if (this?.state?.status === 'submitted') {
+            return chalk.gray(msg)
+        } else {
+            return msg
+        }
+    }
+}
+
 interface ITaskRunner<T, E> {
     /** step1. 输入 */
     input: () => Promise<E>
@@ -51,7 +61,7 @@ export const runChoiceCreateForm = async (): Promise<boolean> => {
             const { create } = await enquirer.prompt({
                 type: 'confirm',
                 name: 'create',
-                message: '缺少配置, 是否创建一个 apifox.rule.json 配置文件',
+                message: createMessage('缺少配置, 是否创建一个 apifox.rule.json 配置文件'),
                 initial: true
             })
 
@@ -69,7 +79,7 @@ export const runOutputDirForm = async (outDir?: string): Promise<string> => {
             const { outDir } = await enquirer.prompt({
                 type: 'input',
                 name: 'outDir',
-                message: `设置导出目录`,
+                message: createMessage(`设置导出目录`),
                 initial: './src/apis'
             })
 
@@ -79,7 +89,7 @@ export const runOutputDirForm = async (outDir?: string): Promise<string> => {
                 const res = await enquirer.prompt({
                     type: 'confirm',
                     name: 'create',
-                    message: `导出目录 [${chalk.blue(outDir)}] 不存在, 是否创建`,
+                    message: createMessage(`导出目录 [${chalk.blue(outDir)}] 不存在, 是否创建`),
                     initial: true
                 })
                 create = res.create
@@ -104,7 +114,7 @@ export const runAppendIndexFileForm = async (appendIndexFile?: boolean): Promise
             const { appendIndexFile } = await enquirer.prompt({
                 type: 'confirm',
                 name: 'appendIndexFile',
-                message: '是否创建公共导出文件 (index.ts)',
+                message: createMessage('是否创建公共导出文件 [index.ts]'),
                 initial: true
             })
             return appendIndexFile
@@ -118,7 +128,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
         const { def } = await enquirer.prompt({
             type: 'select',
             name: 'def',
-            message: '是否使用默认生成模板',
+            message: createMessage('是否使用默认生成模板'),
             choices: ['默认模板', '自定义模板'],
             initial: '默认模板'
         })
@@ -128,6 +138,8 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
                     '/** [group-path] - [group-name]',
                     ' *',
                     ' * @apifox [apifox-url]',
+                    ' * @size (启用接口数量) [api-size]个',
+                    ' * ',
                     ' * @author apifox-generator',
                     ' */'
                 ],
@@ -161,11 +173,13 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
     if (!template.header) {
         const { result } = await new Snippet({
             name: 'header',
-            message: '设置文件头样式',
+            message: createMessage('设置文件头样式'),
             template: [
                 '/** {{header:[group-path] - [group-name]}}',
                 ' *',
                 ' * @apifox {{lib:[apifox-url]}}',
+                ' * @size (启用接口数量) [api-size]',
+                ' * ',
                 ' * @author {{author:apifox-generator}}',
                 ' */'
             ].join('\n'),
@@ -173,8 +187,9 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
                 '**********************************************',
                 ' - [group-path] | 当前组的上级文件夹名称 (在存在同名分组时, 可能有些用处)',
                 ' - [group-name] | 组名 (apifox 文件夹名称)',
-                ' - [file-name] | 文件名',
+                ' - [file-name]  | 文件名',
                 ' - [apifox-url] | 当前项目在apifox上的文件地址',
+                ' - [api-size] | | 当前文件夹下生成的接口数量',
                 '**********************************************'
             ].join('\n')
         }).run()
@@ -186,7 +201,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
         let { importSyntax } = await enquirer.prompt({
             type: 'select',
             name: 'importSyntax',
-            message: '设置导入语句格式',
+            message: createMessage('设置导入语句格式'),
             choices: ['import { [requestUtil] } from [utilPath]', 'import [requestUtil] from [utilPath]']
         })
         template.importSyntax = importSyntax
@@ -197,7 +212,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
         let { requestUtil } = await enquirer.prompt({
             type: 'select',
             name: 'requestUtil',
-            message: '选择请求工具',
+            message: createMessage('选择请求工具'),
             header: [
                 '*********************************************************************',
                 '',
@@ -214,7 +229,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
             const res = await enquirer.prompt({
                 type: 'input',
                 name: 'requestUtil',
-                message: '输入自定义请求工具名称',
+                message: createMessage('输入自定义请求工具名称'),
                 initial: 'request'
             })
             requestUtil = res.requestUtil
@@ -231,13 +246,13 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
         const { confirm } = await enquirer.prompt({
             type: 'confirm',
             name: 'confirm',
-            message: `是否使用 [@/utils/${template.requestUtil}] 作为工具地址`,
+            message: createMessage(`是否使用 [${chalk.blue('@/utils/' + template.requestUtil)}] 作为工具地址`),
             initial: true
         })
         const { utilPath } = await enquirer.prompt({
             type: 'input',
             name: 'utilPath',
-            message: '请确认请求工具地址',
+            message: createMessage('请确认请求工具地址'),
             initial: `'@/utils/${template.requestUtil}'`,
             skip: confirm
         })
@@ -250,7 +265,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
             {
                 type: 'select',
                 name: 'filter',
-                message: `过滤方式 <filter>`,
+                message: createMessage(`过滤方式 <filter>`),
                 choices: [
                     { name: 'delete (删除)', value: 'delete' },
                     { name: 'unrequire (非必填)', value: 'unrequire' }
@@ -267,7 +282,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
         const { extend } = await enquirer.prompt({
             type: 'input',
             name: 'extend',
-            message: `父类 <extend>`,
+            message: createMessage(`父类 <extend>`),
             skip: keys.length === 0,
             initial: null
         })
@@ -280,7 +295,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
             {
                 type: 'select',
                 name: 'filter',
-                message: `过滤方式 <filter>`,
+                message: createMessage(`过滤方式 <filter>`),
                 choices: [
                     { name: 'delete (删除)', value: 'delete' },
                     { name: 'unrequire (非必填)', value: 'unrequire' }
@@ -297,7 +312,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
         const { extend } = await enquirer.prompt({
             type: 'input',
             name: 'extend',
-            message: `父类 <extend>`,
+            message: createMessage(`父类 <extend>`),
             skip: keys.length === 0,
             initial: null
         })
@@ -314,7 +329,7 @@ export const runLoginForm = async (token?: string): Promise<string> => {
             const { form } = await enquirer.prompt({
                 type: 'form',
                 name: 'form',
-                message: 'launch login...',
+                message: createMessage('launch login...'),
                 choices: [
                     { name: 'account', message: '账号/邮箱' },
                     { name: 'password', message: '密码' }
@@ -337,7 +352,11 @@ export const runProjectIdForm = async (token: string, projectId?: string): Promi
     point.warn('获取方式 (projectId): 通过apifox web端进入项目后, 从url参数中获取')
     return await createTaskRunner({
         input: async () => {
-            const { projectId } = await enquirer.prompt({ type: 'input', name: 'projectId', message: 'projectId' })
+            const { projectId } = await enquirer.prompt({
+                type: 'input',
+                name: 'projectId',
+                message: createMessage('projectId')
+            })
             return projectId
         },
         exec: async (projectId) => {
@@ -358,7 +377,7 @@ export const runSetApiFileNameMapForm = async (flatList: TSimpleTrees): Promise<
             const { form } = await enquirer.prompt({
                 type: 'form',
                 name: 'form',
-                message: '设置接口映射文件名',
+                message: createMessage('设置接口映射文件名'),
                 align: 'left',
                 choices: flatList.map((item) => {
                     return { name: item.id, message: ' ' + item.name }

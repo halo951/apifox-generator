@@ -32,9 +32,10 @@ export declare class Generator {
      * @param {string} file 文件名
      * @param {string} groupName 组名
      * @param {string} groupPath 组路径
+     * @param {number} size 接口数量
      * @returns {string} 文件头
      */
-    generateHeader(file: string, groupName: string, groupPath: string): string;
+    generateHeader(file: string, groupName: string, groupPath: string, size: number): string;
     /** 生成文件内容 */
     generateContext(name: string, maps: Array<IApiOriginInfo>): string;
     /** 生成公共的导出文件 */

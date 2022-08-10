@@ -14,11 +14,12 @@ import { ITreeNode } from './intf/ITreeData'
 import { IApiOriginInfo } from './intf/IApiOriginInfo'
 
 import { getPrettierConfig } from './utils/prettier.config'
-import { transform, appendParentInterface } from './utils/schema'
+import { transform, appendParentInterface, transformSchemaRef } from './utils/schema'
 import { formatInterfaceName, formatNameSuffixByDuplicate, formatToHump } from './utils/format'
 import { point } from './utils/point'
 import { loading, step } from './utils/decorators'
 import { Configure } from './configure'
+import chalk from 'chalk'
 
 type TCache = Array<{ moduleName: string; comment: string; mapFile: string; header: string; context: string }>
 
@@ -31,9 +32,8 @@ export class Generator {
         fix: true,
         overrideConfig: {
             parser: '@typescript-eslint/parser',
-            plugins: ['@typescript-eslint', 'prettier'],
+            plugins: ['@typescript-eslint'],
             rules: {
-                'prettier/prettier': [2],
                 '@typescript-eslint/array-type': [2, { default: 'generic' }]
             }
         }
@@ -46,16 +46,16 @@ export class Generator {
     })
     @loading('generate...')
     async exec(configure: Configure): Promise<void> {
-        const { config, details, treeList } = configure
+        const { config, details, treeList, schemas } = configure
         this.config = config
         this.details = details
         const { outDir, usage } = config
         const cache: TCache = []
-
+        // -> 处理 schema $ref 引用
+        transformSchemaRef(details, schemas)
         // ? 遍历并生成文件集合
         for (const { id, name } of usage) {
             const mapFile: string = config.mapFile.find((mf) => mf.id === id)?.file ?? 'undefined'
-            fs.writeFileSync('./1.json', JSON.stringify(treeList, null, 4), { encoding: 'utf-8' })
             // 从 treeNode 中, 拿到当前 folder 的子集
             const apis: Array<IDetail> = this.findApisByFolder(treeList, id)
             // 检查 apis 集合内, 是否存在完全相同的 path, 弹出报错信息
@@ -72,7 +72,7 @@ export class Generator {
             const groupPath: string = this.findGroupPath(id, treeList)
             // 生成文件头
             // 文件名, 组名, 组路径
-            const header: string = this.generateHeader(mapFile, name, groupPath)
+            const header: string = this.generateHeader(mapFile, name, groupPath, maps.length)
             // 生成文件内容
             const context: string = this.generateContext(name, maps)
             // 存入缓冲区
@@ -195,12 +195,16 @@ export class Generator {
             declareExternallyReferenced: false,
             ignoreMinAndMaxItems: true,
             additionalProperties: false,
-            unknownAny: false,
-            $refOptions: {}
+            unknownAny: false
         }
 
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
-            params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, opt)
+            try {
+                params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, opt)
+            } catch (error) {
+                point.error('json2ts parser error: ' + paramsInterfaceName)
+                params = `export interface ${paramsInterfaceName} { [key:string|number]: any }`
+            }
         } else {
             params = null
         }
@@ -212,7 +216,13 @@ export class Generator {
             transform(resp.jsonSchema, globalResponseParams)
             appendParentInterface(resp.jsonSchema, globalResponseParams.extend)
             const rin: string = formatNameSuffixByDuplicate(responseInterfaceName, duplicate)
-            const response = await json2ts.compile(resp.jsonSchema, rin, opt)
+            let response!: string
+            try {
+                response = await json2ts.compile(resp.jsonSchema, rin, opt)
+            } catch (error) {
+                point.error('json2ts parser error: ' + rin)
+                response = `export interface ${rin} { [key:string|number]: any }`
+            }
             responseNames.push(rin)
             responses.push(response)
         }
@@ -238,15 +248,17 @@ export class Generator {
      * @param {string} file 文件名
      * @param {string} groupName 组名
      * @param {string} groupPath 组路径
+     * @param {number} size 接口数量
      * @returns {string} 文件头
      */
-    generateHeader(file: string, groupName: string, groupPath: string): string {
+    generateHeader(file: string, groupName: string, groupPath: string, size: number): string {
         const { header, importSyntax, requestUtil, utilPath, globalRequestParams, globalResponseParams } =
             this.config.template
         let template: string = ``
         let imp = importSyntax
             .replace('[requestUtil]', requestUtil)
-            .replace('[utilPath]', `"${utilPath}"`)
+            .replace('{ axios }', 'axios')
+            .replace('[utilPath]', `"${requestUtil === 'axios' ? 'axios' : utilPath}"`)
             .replace(/["']{2}/, '"')
         if (globalRequestParams.extend || globalResponseParams.extend) {
             let ext = [globalRequestParams.extend, globalResponseParams.extend].filter((e) => e).join(', ')
@@ -269,6 +281,7 @@ export class Generator {
             .replace(/\[group-name\]/g, groupName)
             .replace(/\[file-name\]/g, file)
             .replace(/\[apifox-url\]/g, `https://www.apifox.cn/web/project/${this.config.projectId}`)
+            .replace(/\[api-size\]/g, size.toString())
         template += '\n\n'
 
         return template
@@ -330,7 +343,7 @@ export class Generator {
             context += requestFunction
             context += '\n\n'
         }
-        context = context.replace(/\/\*\*\n.+?\* (.*)\n.*\*\//g, (sub, $1) => {
+        context = context.replace(/\/\*\*\n.+?\* (.*)\n.*\*\//g, (_sub, $1) => {
             return `/** ${$1} */`
         })
         context = context.replace(/NoName/g, 'any // 注: 工具协议版本低, 未识别对象类型')
@@ -362,8 +375,12 @@ export class Generator {
         const prettierConfig = await getPrettierConfig()
         // 循环输出文件 (执行prettier格式化)
         let out: string = header + '\n' + context
-        out = (await this.eslint.lintText(out, {}))[0].output ?? ''
-        out = prettier.format(out, { parser: 'typescript', ...prettierConfig } as prettier.Options)
+        try {
+            out = (await this.eslint.lintText(out, {}))[0].output ?? out
+            out = prettier.format(out, { parser: 'typescript', ...prettierConfig } as prettier.Options)
+        } catch (error) {
+            point.error('typescript parser failure. please check: ' + chalk.magenta(mapFile))
+        }
         let outName: string = np.join(outDir, mapFile)
         if (np.extname(outName) !== '.ts') outName += '.ts'
         fs.writeFileSync(outName, out, { encoding: 'utf-8' })

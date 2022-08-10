@@ -3,6 +3,7 @@ import { TTreeNodes } from './intf/ITreeData';
 import { TDetils } from './intf/IDetail';
 import { EMode } from './intf/EMode';
 import { TSimpleTrees } from './intf/ISimpleTree';
+import { TSchemas } from './intf/ISchema';
 /** 处理配置变更, 用户配置项输入 */
 export declare class Configure {
     /** 配置 */
@@ -13,6 +14,8 @@ export declare class Configure {
     treeList: TTreeNodes;
     /** 接口信息 | 扁平列表结构 */
     details: TDetils;
+    /** schema集合 | 用于结构映射数据记录 */
+    schemas: TSchemas;
     run(config: IConfig, mode: EMode): Promise<IConfig>;
     /** 拉取接口数据 */
     pullData(): Promise<void>;
