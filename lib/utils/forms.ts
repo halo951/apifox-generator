@@ -349,12 +349,12 @@ export const runLoginForm = async (token?: string): Promise<string> => {
 /** projectId 设置及检查 */
 export const runProjectIdForm = async (token: string, projectId?: string): Promise<string> => {
     if (projectId) return projectId
-    point.warn('获取方式 (projectId): 通过apifox web端进入项目后, 从url参数中获取')
     return await createTaskRunner({
         input: async () => {
             const { projectId } = await enquirer.prompt({
                 type: 'input',
                 name: 'projectId',
+                header: chalk.yellow('!', '获取方式 (projectId): 通过apifox web端进入项目后, 从url参数中获取'),
                 message: createMessage('projectId')
             })
             return projectId
