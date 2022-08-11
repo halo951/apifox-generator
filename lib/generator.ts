@@ -259,7 +259,7 @@ export class Generator {
             .replace('[requestUtil]', requestUtil)
             .replace('{ axios }', 'axios')
             .replace('[utilPath]', `"${requestUtil === 'axios' ? 'axios' : utilPath}"`)
-            .replace(/["']{2}/, '"')
+            .replace(/["']{2}/g, '"')
         if (globalRequestParams.extend || globalResponseParams.extend) {
             let ext = [globalRequestParams.extend, globalResponseParams.extend].filter((e) => e).join(', ')
             let defImport: boolean = !/\{/.test(imp)
