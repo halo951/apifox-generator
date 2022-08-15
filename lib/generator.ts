@@ -20,6 +20,7 @@ import { point } from './utils/point'
 import { loading, step } from './utils/decorators'
 import { Configure } from './configure'
 import chalk from 'chalk'
+import typescript, { ModuleKind, ScriptTarget } from 'typescript'
 
 type TCache = Array<{ moduleName: string; comment: string; mapFile: string; header: string; context: string }>
 
@@ -28,6 +29,8 @@ const strEqual = (a: any, b: any) => `${a}` === `${b}`
 export class Generator {
     config!: IConfig
     details!: Array<IDetail>
+    js!: boolean
+
     eslint: ESLint = new ESLint({
         fix: true,
         overrideConfig: {
@@ -39,16 +42,22 @@ export class Generator {
         }
     })
 
+    /**
+     *
+     * @param configure 配置
+     * @param js 是否生成ts版本
+     */
     @step({
         start: 'start generate',
         success: 'success',
         exit: true
     })
     @loading('generate...')
-    async exec(configure: Configure): Promise<void> {
+    async exec(configure: Configure, js?: boolean): Promise<void> {
         const { config, details, treeList, schemas } = configure
         this.config = config
         this.details = details
+        this.js = !!js
         const { outDir, usage } = config
         const cache: TCache = []
         // -> 处理 schema $ref 引用
@@ -79,7 +88,9 @@ export class Generator {
             cache.push({ moduleName: np.basename(mapFile), comment: name, mapFile, header, context })
         }
         // 输出文件
-        for (const c of cache) await this.outputFile(outDir, c.mapFile, c.header, c.context)
+        for (const c of cache) {
+            await this.outputFile(outDir, c.mapFile, c.header, c.context)
+        }
         // 导出接口公共出口文件
         if (this.config.appendIndexFile) {
             this.outputFile(outDir, 'index.ts', this.generateIndexFile(cache), '')
@@ -375,14 +386,27 @@ export class Generator {
         const prettierConfig = await getPrettierConfig()
         // 循环输出文件 (执行prettier格式化)
         let out: string = header + '\n' + context
+        if (this.js) {
+            // transform to js
+            out = typescript.transpile(out, {
+                strict: false,
+                target: ScriptTarget.ESNext,
+                module: ModuleKind.ESNext,
+                declaration: true
+            })
+        }
         try {
             out = (await this.eslint.lintText(out, {}))[0].output ?? out
             out = prettier.format(out, { parser: 'typescript', ...prettierConfig } as prettier.Options)
         } catch (error) {
             point.error('typescript parser failure. please check: ' + chalk.magenta(mapFile))
         }
-        let outName: string = np.join(outDir, mapFile)
-        if (np.extname(outName) !== '.ts') outName += '.ts'
+        let outName: string = np.join(outDir, mapFile).replace(/\.(tj)s$/, '')
+        if (this.js) {
+            outName += '.js'
+        } else {
+            outName += '.ts'
+        }
         fs.writeFileSync(outName, out, { encoding: 'utf-8' })
     }
 }

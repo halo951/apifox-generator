@@ -152,13 +152,13 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
                 globalRequestParams: {
                     extend: null,
                     keys: [],
-                    filter: 'delete'
+                    filter: 'unrequire'
                 },
                 /** 全局响应变量 */
                 globalResponseParams: {
                     extend: null,
                     keys: [],
-                    filter: 'delete'
+                    filter: 'unrequire'
                 }
             }
         } else {
@@ -253,7 +253,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
             type: 'input',
             name: 'utilPath',
             message: createMessage('请确认请求工具地址'),
-            initial: `'@/utils/${template.requestUtil}'`,
+            initial: `@/utils/${template.requestUtil}`,
             skip: confirm
         })
         template.utilPath = utilPath
@@ -270,7 +270,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
                     { name: 'delete (删除)', value: 'delete' },
                     { name: 'unrequire (非必填)', value: 'unrequire' }
                 ],
-                inittal: 'delete'
+                inittal: 'unrequire'
             },
             {
                 type: 'list',
@@ -300,7 +300,7 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
                     { name: 'delete (删除)', value: 'delete' },
                     { name: 'unrequire (非必填)', value: 'unrequire' }
                 ],
-                inittal: 'delete'
+                inittal: 'unrequire'
             },
             {
                 type: 'list',
@@ -377,6 +377,7 @@ export const runSetApiFileNameMapForm = async (flatList: TSimpleTrees): Promise<
             const { form } = await enquirer.prompt({
                 type: 'form',
                 name: 'form',
+                header: `> 注: 输入文件名时, 不需要填写'.ts'文件名后缀`,
                 message: createMessage('设置接口映射文件名'),
                 align: 'left',
                 choices: flatList.map((item) => {
@@ -418,6 +419,20 @@ export const runSetApiFileNameMapForm = async (flatList: TSimpleTrees): Promise<
                 out.push({ id, name, file })
             }
             return out
+        }
+    })
+}
+
+/** 提示是否合并目录 */
+export const runConfirmMergeDirectory = async (directory: string): Promise<boolean> => {
+    return await createTaskRunner({
+        input: async () => {
+            const { merge } = await enquirer.prompt({
+                type: 'confirm',
+                name: 'merge',
+                message: createMessage(`目录 【${directory}】存在子目录, 是否合并?`)
+            })
+            return merge
         }
     })
 }

@@ -13,25 +13,25 @@ export default class ApifoxGenerator {
     generator: Generator = new Generator()
 
     async exec(): Promise<void> {
-        const { q: quick, r: reset, init } = minimist(process.argv)
-        let mode: 1 | 2 | 0 = quick ? 1 : reset ? 2 : 0
+        const { r: reset, js, init } = minimist(process.argv)
+        // ? use init
         if (init) return this.init()
         // ? check config is exists from current project.
         await this.loader.check()
         // # 读取配置
         await this.loader.read()
         // # 配置检查 & 用户输入
-        await this.configure.run(this.loader.config, mode)
+        await this.configure.run(this.loader.config, reset)
         // # 写入 & 更新配置文件
         await this.loader.write()
         // -> 执行 - 生成
-        await this.generator.exec(this.configure)
+        await this.generator.exec(this.configure, js)
     }
 
     /** 初始化配置项 */
     async init(): Promise<void> {
         // # 配置检查 & 用户输入
-        await this.configure.run(this.loader.config, 0)
+        await this.configure.run(this.loader.config, true)
         // # 写入 & 更新配置文件
         await this.loader.write()
     }

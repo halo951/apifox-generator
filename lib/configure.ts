@@ -9,9 +9,9 @@ import {
     runOutputDirForm,
     runTemplateForm,
     runProjectIdForm,
-    runSetApiFileNameMapForm
+    runSetApiFileNameMapForm,
+    runConfirmMergeDirectory
 } from './utils/forms'
-import { EMode } from './intf/EMode'
 import { step } from './utils/decorators'
 import { ISimpleTree, TSimpleTrees } from './intf/ISimpleTree'
 import { TreeSelectPrompt } from './utils/tree-select-prompt'
@@ -21,8 +21,6 @@ import { TSchemas } from './intf/ISchema'
 export class Configure {
     /** 配置 */
     config!: IConfig
-    /** 是否启用快捷模式 */
-    mode!: EMode
 
     /** 接口关系 | 树图结构 */
     treeList: TTreeNodes = []
@@ -39,9 +37,19 @@ export class Configure {
         failure: 'configuration item check not completed, task exit',
         exit: true
     })
-    async run(config: IConfig, mode: EMode): Promise<IConfig> {
+    async run(config: IConfig, reset: boolean | string): Promise<IConfig> {
         this.config = config
-        this.mode = mode
+        if (reset) {
+            if (typeof reset === 'string') {
+                for (const key of reset.split(',')) {
+                    if (this.config[key as keyof IConfig]) {
+                        delete this.config[key as keyof IConfig]
+                    }
+                }
+            } else {
+                this.config = {} as any
+            }
+        }
         // -> 设置生成文件的导出目录
         this.config.outDir = await runOutputDirForm(this.config.outDir)
         // -> 设置是否生成公共导出文件 (index.ts)
@@ -132,7 +140,8 @@ export class Configure {
      *  - 如果数据源发生更改, 触发待生成结构项更新
      */
     async multiSelectUsageApis(folders: TSimpleTrees, usage: TSimpleTrees) {
-        const res = await new TreeSelectPrompt({
+        type IList = Array<{ id: string; name: string }>
+        const selected: IList = await new TreeSelectPrompt({
             message: '选择需要生成的接口集合',
             choices: folders,
             initial: usage,
@@ -146,7 +155,38 @@ export class Configure {
                 '********************************************************************************'
             ].join('\n')
         }).run()
-        return res
+
+        const find = (list: TSimpleTrees, current: { id: string }): ISimpleTree | null => {
+            for (const item of list) {
+                if (item.id === current.id) {
+                    return item
+                } else if (item.children) {
+                    const res = find(item.children, current)
+                    if (res) return res
+                }
+            }
+            return null
+        }
+        let out: IList = []
+        const transform = async (list: any, parent: Array<string>) => {
+            for (const item of list) {
+                const origin = find(folders, item)
+                if (origin?.children && origin.children.length > 0) {
+                    // 提示用户是否合并此目录
+                    const merge = await runConfirmMergeDirectory([...parent, origin.name].join('/'))
+                    if (merge) {
+                        out.push({ id: item.id, name: item.name })
+                    } else {
+                        // deep check
+                        await transform(origin.children, [...parent, origin.name])
+                    }
+                } else {
+                    out.push({ id: item.id, name: item.name })
+                }
+            }
+        }
+        await transform(selected, [])
+        return out
     }
 
     /** 设置接口别名 (接口文件名) */
@@ -165,7 +205,7 @@ export class Configure {
             return value
         }
 
-        // 将二维数组转化为1维数组
+        // 将多维数组转化为1维数组
         const form: TSimpleTrees = treeToFlatArray(this.config.usage).filter((u) => {
             return !this.config.mapFile.some((mf) => mf.id === u.id && mf.file && mf.file?.trim() !== '')
         })

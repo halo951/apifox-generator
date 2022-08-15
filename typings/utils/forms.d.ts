@@ -13,3 +13,5 @@ export declare const runLoginForm: (token?: string) => Promise<string>;
 /** projectId 设置及检查 */
 export declare const runProjectIdForm: (token: string, projectId?: string) => Promise<string>;
 export declare const runSetApiFileNameMapForm: (flatList: TSimpleTrees) => Promise<Array<IApiGroupNameMap>>;
+/** 提示是否合并目录 */
+export declare const runConfirmMergeDirectory: (directory: string) => Promise<boolean>;

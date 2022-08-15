@@ -15,8 +15,14 @@ declare type TCache = Array<{
 export declare class Generator {
     config: IConfig;
     details: Array<IDetail>;
+    js: boolean;
     eslint: ESLint;
-    exec(configure: Configure): Promise<void>;
+    /**
+     *
+     * @param configure 配置
+     * @param js 是否生成ts版本
+     */
+    exec(configure: Configure, js?: boolean): Promise<void>;
     /** 从treeNode中, 获取folder下所有接口集合 */
     findApisByFolder(treeList: Array<ITreeNode>, id?: string | number): Array<IDetail>;
     /** 查找组路径 */
