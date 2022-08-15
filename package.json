@@ -1,6 +1,6 @@
 {
     "name": "apifox-generator",
-    "version": "1.2.0-beta.5",
+    "version": "1.2.0-beta.6",
     "description": "generate project api maps by apifox agreement",
     "keywords": [
         "apifox",
