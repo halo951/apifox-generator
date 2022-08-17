@@ -267,10 +267,10 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
                 name: 'filter',
                 message: createMessage(`过滤方式 <filter>`),
                 choices: [
-                    { name: 'delete (删除)', value: 'delete' },
-                    { name: 'unrequire (非必填)', value: 'unrequire' }
+                    { name: 'unrequire', message: 'unrequire (非必填)' },
+                    { name: 'delete', message: 'delete (删除)' }
                 ],
-                inittal: 'unrequire'
+                initial: 'unrequire'
             },
             {
                 type: 'list',
@@ -286,7 +286,11 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
             skip: keys.length === 0,
             initial: null
         })
-        template.globalRequestParams = { extend, filter, keys }
+        template.globalRequestParams = {
+            extend: extend === '' ? null : extend,
+            filter,
+            keys: keys.filter((k: string) => k && k.trim() !== '').map((k: string) => k.trim())
+        }
     }
 
     if (!template.globalResponseParams) {
@@ -297,10 +301,10 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
                 name: 'filter',
                 message: createMessage(`过滤方式 <filter>`),
                 choices: [
-                    { name: 'delete (删除)', value: 'delete' },
-                    { name: 'unrequire (非必填)', value: 'unrequire' }
+                    { name: 'unrequire', message: 'unrequire (非必填)' },
+                    { name: 'delete', message: 'delete (删除)' }
                 ],
-                inittal: 'unrequire'
+                initial: 'unrequire'
             },
             {
                 type: 'list',
@@ -316,7 +320,11 @@ export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGen
             skip: keys.length === 0,
             initial: null
         })
-        template.globalResponseParams = { extend, filter, keys }
+        template.globalResponseParams = {
+            extend: extend === '' ? null : extend,
+            filter,
+            keys: keys.filter((k: string) => k && k.trim() !== '').map((k: string) => k.trim())
+        }
     }
     return template
 }
