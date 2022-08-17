@@ -1,4 +1,4 @@
-import { ESLint } from 'eslint';
+import { Linter } from 'eslint';
 import { IConfig } from './intf/IConfig';
 import { IDetail } from './intf/IDetail';
 import { ITreeNode } from './intf/ITreeData';
@@ -16,7 +16,8 @@ export declare class Generator {
     config: IConfig;
     details: Array<IDetail>;
     js: boolean;
-    eslint: ESLint;
+    linter: Linter;
+    constructor();
     /**
      *
      * @param configure 配置

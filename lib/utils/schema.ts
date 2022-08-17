@@ -84,3 +84,8 @@ export const transformSchemaRef = (details: TDetils = [], schemas: TSchemas = []
     deep(schemas)
     deep(details)
 }
+
+/** 移除已废弃API */
+export const removeDeprecatedApi = (details: TDetils = []): TDetils => {
+    return details.filter((d) => d.status !== 'deprecated')
+}

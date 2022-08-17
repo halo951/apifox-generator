@@ -5,8 +5,12 @@ import * as json2ts from 'json-schema-to-typescript'
 import prettier from 'prettier'
 import dayjs from 'dayjs'
 import { mkdirsSync } from 'fs-extra'
-import { ESLint } from 'eslint' // 通过eslint + prettier + @typescript-eslint 格式化 输出文件
 import { GroupBy } from 'array-grouping'
+import chalk from 'chalk'
+import typescript, { ModuleKind, ScriptTarget } from 'typescript'
+import { Linter } from 'eslint'
+import { rules } from '@typescript-eslint/eslint-plugin'
+import parser from '@typescript-eslint/parser'
 
 import { IConfig } from './intf/IConfig'
 import { IDetail } from './intf/IDetail'
@@ -14,13 +18,11 @@ import { ITreeNode } from './intf/ITreeData'
 import { IApiOriginInfo } from './intf/IApiOriginInfo'
 
 import { getPrettierConfig } from './utils/prettier.config'
-import { transform, appendParentInterface, transformSchemaRef } from './utils/schema'
+import { transform, appendParentInterface, transformSchemaRef, removeDeprecatedApi } from './utils/schema'
 import { formatInterfaceName, formatNameSuffixByDuplicate, formatToHump } from './utils/format'
 import { point } from './utils/point'
 import { loading, step } from './utils/decorators'
 import { Configure } from './configure'
-import chalk from 'chalk'
-import typescript, { ModuleKind, ScriptTarget } from 'typescript'
 
 type TCache = Array<{ moduleName: string; comment: string; mapFile: string; header: string; context: string }>
 
@@ -31,17 +33,12 @@ export class Generator {
     details!: Array<IDetail>
     js!: boolean
 
-    eslint: ESLint = new ESLint({
-        fix: true,
-        overrideConfig: {
-            parser: '@typescript-eslint/parser',
-            plugins: ['@typescript-eslint'],
-            rules: {
-                '@typescript-eslint/array-type': [2, { default: 'generic' }]
-            }
-        }
-    })
+    linter: Linter = new Linter()
 
+    constructor() {
+        this.linter.defineParser('@typescript-eslint/parser', parser as any)
+        this.linter.defineRules(rules as any)
+    }
     /**
      *
      * @param configure 配置
@@ -60,6 +57,8 @@ export class Generator {
         this.js = !!js
         const { outDir, usage } = config
         const cache: TCache = []
+        // -> 移除废弃接口
+        this.details = removeDeprecatedApi(details)
         // -> 处理 schema $ref 引用
         transformSchemaRef(details, schemas)
         // ? 遍历并生成文件集合
@@ -386,17 +385,22 @@ export class Generator {
         const prettierConfig = await getPrettierConfig()
         // 循环输出文件 (执行prettier格式化)
         let out: string = header + '\n' + context
-        if (this.js) {
-            // transform to js
-            out = typescript.transpile(out, {
-                strict: false,
-                target: ScriptTarget.ESNext,
-                module: ModuleKind.ESNext,
-                declaration: true
-            })
-        }
         try {
-            out = (await this.eslint.lintText(out, {}))[0].output ?? out
+            if (this.js) {
+                // transform to js
+                out = typescript.transpile(out, {
+                    strict: false,
+                    target: ScriptTarget.ESNext,
+                    module: ModuleKind.ESNext,
+                    declaration: true
+                })
+            }
+            out = this.linter.verifyAndFix(out, {
+                parser: '@typescript-eslint/parser',
+                rules: {
+                    'array-type': [2, { default: 'generic' }]
+                }
+            }).output
             out = prettier.format(out, { parser: 'typescript', ...prettierConfig } as prettier.Options)
         } catch (error) {
             point.error('typescript parser failure. please check: ' + chalk.magenta(mapFile))
