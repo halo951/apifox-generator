@@ -380,21 +380,15 @@ export class Generator {
 
     /** 输出文件 */
     async outputFile(outDir: string, mapFile: string, header: string, context: string): Promise<void> {
+        // 获取 prettier 格式化配置
+        const prettierConfig = await getPrettierConfig()
         // 检查输出目录是否存在, 不存在创建
         mkdirsSync(outDir)
-        const prettierConfig = await getPrettierConfig()
         // 循环输出文件 (执行prettier格式化)
         let out: string = header + '\n' + context
+        let outName: string = np.join(outDir, mapFile)
+        outName = outName.replace(np.extname(outName), '')
         try {
-            if (this.js) {
-                // transform to js
-                out = typescript.transpile(out, {
-                    strict: false,
-                    target: ScriptTarget.ESNext,
-                    module: ModuleKind.ESNext,
-                    declaration: true
-                })
-            }
             out = this.linter.verifyAndFix(out, {
                 parser: '@typescript-eslint/parser',
                 rules: {
@@ -405,12 +399,36 @@ export class Generator {
         } catch (error) {
             point.error('typescript parser failure. please check: ' + chalk.magenta(mapFile))
         }
-        let outName: string = np.join(outDir, mapFile).replace(/\.[tj]s$/, '')
+
         if (this.js) {
-            outName += '.js'
+            const transformers = (typescript as any).getTransformers({
+                target: typescript.ScriptTarget.ESNext,
+                module: typescript.ModuleKind.ESNext,
+                declaration: true
+            })
+
+            // transform to js
+            let jsFile: string = typescript.transpile(out, {
+                strict: false,
+                target: ScriptTarget.ESNext,
+                module: ModuleKind.ESNext,
+                declaration: true
+            })
+
+            let dTsFile: string = typescript.transpileModule(out, {
+                compilerOptions: {
+                    target: typescript.ScriptTarget.ESNext,
+                    module: typescript.ModuleKind.ESNext,
+                    declaration: true
+                },
+                transformers: {
+                    before: transformers.declarationTransformers
+                }
+            }).outputText
+            fs.writeFileSync(outName + '.js', jsFile, { encoding: 'utf-8' })
+            fs.writeFileSync(outName + '.d.ts', dTsFile, { encoding: 'utf-8' })
         } else {
-            outName += '.ts'
+            fs.writeFileSync(outName + '.ts', out, { encoding: 'utf-8' })
         }
-        fs.writeFileSync(outName, out, { encoding: 'utf-8' })
     }
 }
