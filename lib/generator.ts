@@ -139,7 +139,7 @@ export class Generator {
                 return detail
             })
         }
-        apis = convert(merge(findChildren(treeList) ?? []))
+        apis = convert(merge(findChildren(treeList) ?? [])).filter((api) => api)
         return apis
     }
 
@@ -405,7 +405,7 @@ export class Generator {
         } catch (error) {
             point.error('typescript parser failure. please check: ' + chalk.magenta(mapFile))
         }
-        let outName: string = np.join(outDir, mapFile).replace(/\.(tj)s$/, '')
+        let outName: string = np.join(outDir, mapFile).replace(/\.[tj]s$/, '')
         if (this.js) {
             outName += '.js'
         } else {

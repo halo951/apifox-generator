@@ -16,3 +16,5 @@ export declare const appendParentInterface: (schema: any, parentInterface?: stri
  * @description 注意: 可能会引发 无限循环问题, 目前改了改暂时先这么用~
  */
 export declare const transformSchemaRef: (details?: TDetils, schemas?: TSchemas) => void;
+/** 移除已废弃API */
+export declare const removeDeprecatedApi: (details?: TDetils) => TDetils;

@@ -19,7 +19,7 @@ export const transform = (schema: any, globalParams: IGlobalParams, parent?: any
             if (schema.description) {
                 schema.description = schema.title + ' | ' + schema.description
             } else {
-                schema.description = schema.title
+                schema.description = schema.title ?? '[缺少注释]'
             }
             delete schema.title
         }
