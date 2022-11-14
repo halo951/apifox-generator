@@ -13,7 +13,9 @@
 
 -   **规则** 参考下方 [QA 解答](#QA)
 
-## install
+## Usage
+
+-   install
 
 ```bash
 
@@ -21,13 +23,7 @@ yarn global add apifox-generator
 
 ```
 
-## usage
-
--   `--js` 生成 JS 项目使用的文件格式
--   `--r [config name]` 重新设置某项配置参数
--   `--init` 仅初始化文档
-
-### to ts project
+-   generate
 
 ```bash
 
@@ -35,11 +31,12 @@ api-gen
 
 ```
 
-### to js project
+## argv
 
-```bash
+-   `--reset [config name]` 重新设置某项配置参数, 示例: `--reset js,projectId`
+-   `--init` 仅初始化文档
 
-api-gen --js
+## 模板参数
 
 ```
 
@@ -84,3 +81,4 @@ apifox 目录发生改变(增加, 删除, 名称变化, 目录移动)等情况, 
 -   根目录下不要放置接口
 
 遵循以上 2 条原则, 当出现子目录场景时, 当子目录全部被选中情况下, 将提示是否将这些子目录下接口合并到同一文件内. 否则(包含, 目录未全选情况)将逐个生成文件.
+```
