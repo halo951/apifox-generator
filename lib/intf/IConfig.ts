@@ -55,6 +55,8 @@ export interface IApiGroupNameMap {
 }
 
 export interface IConfig {
+    /** 是否为js项目 */
+    js: boolean
     /** 输出目录 */
     outDir: string
     /** tk | usage token access apis */

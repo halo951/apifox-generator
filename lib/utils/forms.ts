@@ -70,6 +70,22 @@ export const runChoiceCreateForm = async (): Promise<boolean> => {
     })
 }
 
+/** 是否js项目 */
+export const runJsForm = async (js?: boolean): Promise<boolean> => {
+    if (js !== undefined) return js
+    return await createTaskRunner({
+        input: async () => {
+            const { js } = await enquirer.prompt({
+                type: 'confirm',
+                name: 'js',
+                message: createMessage('是否创建公共导出文件 [index.ts]'),
+                initial: true
+            })
+            return js
+        }
+    })
+}
+
 /** 导出目录配置 */
 export const runOutputDirForm = async (outDir?: string): Promise<string> => {
     if (outDir) return outDir

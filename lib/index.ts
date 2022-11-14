@@ -7,13 +7,15 @@ import { Generator } from './generator'
 export default class ApifoxGenerator {
     /** 配置加载 & 写入工具 */
     loader: Loader = new Loader()
+
     /** 配置项管理 */
     configure: Configure = new Configure()
+
     /** 代码生成器 */
     generator: Generator = new Generator()
 
     async exec(): Promise<void> {
-        const { r: reset, js, init } = minimist(process.argv)
+        const { reset, init } = minimist(process.argv)
         // ? use init
         if (init) return this.init()
         // ? check config is exists from current project.
@@ -25,7 +27,7 @@ export default class ApifoxGenerator {
         // # 写入 & 更新配置文件
         await this.loader.write()
         // -> 执行 - 生成
-        await this.generator.exec(this.configure, js)
+        await this.generator.exec(this.configure)
     }
 
     /** 初始化配置项 */
