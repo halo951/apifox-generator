@@ -50,11 +50,11 @@ export class Generator {
         exit: true
     })
     @loading('generate...')
-    async exec(configure: Configure, js?: boolean): Promise<void> {
+    async exec(configure: Configure): Promise<void> {
         const { config, details, treeList, schemas } = configure
         this.config = config
         this.details = details
-        this.js = !!js
+        this.js = config.language === 'js'
         const { outDir, usage } = config
         const cache: TCache = []
         // -> 移除废弃接口

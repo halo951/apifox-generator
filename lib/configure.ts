@@ -4,7 +4,7 @@ import { apis } from './apis'
 import { TTreeNodes } from './intf/ITreeData'
 import { TDetils } from './intf/IDetail'
 import {
-    runJsForm,
+    runLanguageForm,
     runAppendIndexFileForm,
     runLoginForm,
     runOutputDirForm,
@@ -51,8 +51,8 @@ export class Configure {
                 this.config = {} as any
             }
         }
-        // -> 设置是否js项目
-        this.config.js = await runJsForm(this.config.js)
+        // -> 设置项目语言
+        this.config.language = await runLanguageForm(this.config.language)
         // -> 设置生成文件的导出目录
         this.config.outDir = await runOutputDirForm(this.config.outDir)
         // -> 设置是否生成公共导出文件 (index.ts)
