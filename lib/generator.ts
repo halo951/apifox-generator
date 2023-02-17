@@ -382,6 +382,13 @@ export class Generator {
     async outputFile(outDir: string, mapFile: string, header: string, context: string): Promise<void> {
         // 获取 prettier 格式化配置
         const prettierConfig = await getPrettierConfig()
+        const format = (context: string) => {
+            try {
+                return prettier.format(context, { parser: 'typescript', ...prettierConfig } as prettier.Options)
+            } catch (error) {
+                return context
+            }
+        }
         // 检查输出目录是否存在, 不存在创建
         mkdirsSync(outDir)
         // 循环输出文件 (执行prettier格式化)
@@ -395,7 +402,6 @@ export class Generator {
                     'array-type': [2, { default: 'generic' }]
                 }
             }).output
-            out = prettier.format(out, { parser: 'typescript', ...prettierConfig } as prettier.Options)
         } catch (error) {
             point.error('typescript parser failure. please check: ' + chalk.magenta(mapFile))
         }
@@ -425,10 +431,10 @@ export class Generator {
                     before: transformers.declarationTransformers
                 }
             }).outputText
-            fs.writeFileSync(outName + '.js', jsFile, { encoding: 'utf-8' })
-            fs.writeFileSync(outName + '.d.ts', dTsFile, { encoding: 'utf-8' })
+            fs.writeFileSync(outName + '.js', format(jsFile), { encoding: 'utf-8' })
+            fs.writeFileSync(outName + '.d.ts', format(dTsFile), { encoding: 'utf-8' })
         } else {
-            fs.writeFileSync(outName + '.ts', out, { encoding: 'utf-8' })
+            fs.writeFileSync(outName + '.ts', format(out), { encoding: 'utf-8' })
         }
     }
 }

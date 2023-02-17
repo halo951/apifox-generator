@@ -2,8 +2,8 @@ import { IApiGroupNameMap, IGenerateTemplate } from '../intf/IConfig';
 import { TSimpleTrees } from '../intf/ISimpleTree';
 /** 选择是否创建配置 */
 export declare const runChoiceCreateForm: () => Promise<boolean>;
-/** 是否js项目 */
-export declare const runJsForm: (js?: boolean) => Promise<boolean>;
+/** 选择项目语言 */
+export declare const runLanguageForm: (language?: 'js' | 'ts') => Promise<'js' | 'ts'>;
 /** 导出目录配置 */
 export declare const runOutputDirForm: (outDir?: string) => Promise<string>;
 /** 选择是否创建公共导出文件 */
