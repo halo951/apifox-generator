@@ -6,6 +6,9 @@
 |- 命令
     |- 默认, -c | 生成接口
     |- -r, --reset | 重新配置
+    |- -i, --import | 导入 request 工具 (默认 axios, @persagy2/request)
+|- ./scripts
+    |- import-requet | 导入 import 工具
 |- ./config --------- 配置入口
     |- 配置项
         |- 版本号
