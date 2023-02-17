@@ -23,7 +23,10 @@ export interface IDetail {
         deletedAt: string | null;
         responseExamples: Array<any>;
     }>;
-    parameters: Array<any>;
+    parameters: {
+        path: Array<any>;
+        query: Array<any>;
+    };
     commonParameters: {
         query: Array<any>;
         body: Array<any>;
@@ -54,4 +57,4 @@ export interface IDetail {
     updatedAt: string;
     deletedAt: string;
 }
-export declare type TDetils = Array<IDetail>;
+export type TDetils = Array<IDetail>;

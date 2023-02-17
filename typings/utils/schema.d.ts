@@ -1,6 +1,7 @@
 import { IGlobalParams } from '../intf/IConfig';
 import { TDetils } from '../intf/IDetail';
 import { TSchemas } from '../intf/ISchema';
+import { JSONSchema } from 'json-schema-to-typescript';
 /** 处理JSONSchema
  *
  * @description 主要用来处理 json2ts 使用的schema协议与apifox协议版本不同的问题
@@ -18,3 +19,5 @@ export declare const appendParentInterface: (schema: any, parentInterface?: stri
 export declare const transformSchemaRef: (details?: TDetils, schemas?: TSchemas) => void;
 /** 移除已废弃API */
 export declare const removeDeprecatedApi: (details?: TDetils) => TDetils;
+/** 转换 url path params 参数格式为JsonScheam */
+export declare const transformPathParamsToJsonScheam: (path: any) => JSONSchema;

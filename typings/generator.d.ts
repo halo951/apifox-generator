@@ -4,7 +4,7 @@ import { IDetail } from './intf/IDetail';
 import { ITreeNode } from './intf/ITreeData';
 import { IApiOriginInfo } from './intf/IApiOriginInfo';
 import { Configure } from './configure';
-declare type TCache = Array<{
+type TCache = Array<{
     moduleName: string;
     comment: string;
     mapFile: string;
@@ -28,12 +28,39 @@ export declare class Generator {
     findApisByFolder(treeList: Array<ITreeNode>, id?: string | number): Array<IDetail>;
     /** 查找组路径 */
     findGroupPath(id: string | number, list: Array<ITreeNode>): string;
+    /** 从 apis 的 path 中, 取出路径中相同的前缀, 作为baseUrl */
+    extractBaseUrlByApis(apis: Array<IDetail>): string;
     /** 检查 apis 集合内, 是否存在完全相同的 path  */
     checkDuplicatePath(apis: Array<IDetail>): void;
     /** 转换元数据为生成接口需要的信息 */
     transformApiInfo(detail: IDetail, duplicate: {
         [key: string]: number;
-    }): Promise<IApiOriginInfo>;
+    }, baseUrl: string): Promise<IApiOriginInfo>;
+    /** 生成 basename, 用于接口方法名
+     *
+     * @param path 接口路径
+     * @param duplicate 命名重复计数
+     * @param baseUrl 相对baseUrl
+     * @returns
+     */
+    generateBaseName(path: string, duplicate: {
+        [key: string]: number;
+    }, baseUrl: string): string;
+    /** 生成参数接口命名
+     *
+     * @param basename 接口路径
+     * @param duplicate
+     * @returns
+     */
+    generateParamsInterfaceName(basename: string, duplicate: {
+        [key: string]: number;
+    }): string;
+    /** 生成响应接口命名
+     *
+     * @param basename 接口路径
+     * @returns
+     */
+    generateResponseInterfaceName(basename: string): string;
     /** 基于模板生成文件结构
      *
      * @param {string} file 文件名

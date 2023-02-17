@@ -18,8 +18,19 @@ import { ITreeNode } from './intf/ITreeData'
 import { IApiOriginInfo } from './intf/IApiOriginInfo'
 
 import { getPrettierConfig } from './utils/prettier.config'
-import { transform, appendParentInterface, transformSchemaRef, removeDeprecatedApi } from './utils/schema'
-import { formatInterfaceName, formatNameSuffixByDuplicate, formatToHump } from './utils/format'
+import {
+    transform,
+    appendParentInterface,
+    transformSchemaRef,
+    removeDeprecatedApi,
+    transformPathParamsToJsonScheam
+} from './utils/schema'
+import {
+    formatInterfaceName,
+    formatNameByDisabledKeyword,
+    formatNameSuffixByDuplicate,
+    formatToHump
+} from './utils/format'
 import { point } from './utils/point'
 import { loading, step } from './utils/decorators'
 import { Configure } from './configure'
@@ -68,12 +79,14 @@ export class Generator {
             const apis: Array<IDetail> = this.findApisByFolder(treeList, id)
             // 检查 apis 集合内, 是否存在完全相同的 path, 弹出报错信息
             this.checkDuplicatePath(apis)
+            // 从 apis 集合内, 获取 baseUrl 属性 (注: 用来处理 Restful Api 范式出现的短路径重复问题)
+            const baseUrl: string = this.extractBaseUrlByApis(apis)
             /** 定义用于记录重复命名的 方法名, 参数接口名, 响应接口名 */
             const duplicate: { [key: string]: number } = {}
             // 转换为接口生成需要的信息
             const maps: Array<IApiOriginInfo> = []
             for (const api of apis) {
-                const info = await this.transformApiInfo(api, duplicate)
+                const info = await this.transformApiInfo(api, duplicate, baseUrl)
                 maps.push(info)
             }
             // 获取组路径
@@ -165,6 +178,30 @@ export class Generator {
         if (log.length === 0) return '*'
         return log.map((l) => l.name).join(' - ')
     }
+    /** 从 apis 的 path 中, 取出路径中相同的前缀, 作为baseUrl */
+    extractBaseUrlByApis(apis: Array<IDetail>): string {
+        // 获取待操作的paths
+        const paths: Array<string> = apis.map((api) => api.path)
+        // 将段落分段
+        const paragraphs: Array<Array<string>> = paths.map((path) => path.split('/'))
+        // 获取分段后, 最小的路径段长度
+        let min: number = paragraphs.reduce(
+            (min: number, p: Array<string>) => (min < p.length ? min : p.length),
+            paragraphs[0].length
+        )
+        let baseUrl: Array<string> = []
+        // 循环生成baseUrl, 默认情况下以最短的Url路径段为准
+        for (let n = 0; n < min; n++) {
+            const current: Array<string> = paragraphs.map((p) => p[n])
+            const set = new Set(current)
+            if (set.size > 1) {
+                break
+            } else {
+                baseUrl.push(current[0])
+            }
+        }
+        return baseUrl.join('/')
+    }
 
     /** 检查 apis 集合内, 是否存在完全相同的 path  */
     checkDuplicatePath(apis: Array<IDetail>): void {
@@ -184,21 +221,28 @@ export class Generator {
     }
 
     /** 转换元数据为生成接口需要的信息 */
-    async transformApiInfo(detail: IDetail, duplicate: { [key: string]: number }): Promise<IApiOriginInfo> {
+    async transformApiInfo(
+        detail: IDetail,
+        duplicate: { [key: string]: number },
+        baseUrl: string
+    ): Promise<IApiOriginInfo> {
         const { id, method, path, name, createdAt, updatedAt } = detail
         const { globalRequestParams, globalResponseParams } = this.config.template
-        const basename: string = formatNameSuffixByDuplicate(formatToHump(np.basename(path)), duplicate)
-        const paramsInterfaceName: string = formatNameSuffixByDuplicate(
-            formatInterfaceName(np.basename(path), 'Params'),
-            duplicate
-        )
-        const responseInterfaceName: string = formatInterfaceName(np.basename(path), 'Response')
+        // 1.1 生成baseName, 作为接口调用方法名
+        const basename: string = this.generateBaseName(path, duplicate, baseUrl)
+        // 1.2 生成参数接口命名
+        const paramsInterfaceName: string = this.generateParamsInterfaceName(basename, duplicate)
+        // 1.3 生成 Restfule Api 路径参数接口命名 (具有唯一性, 不需要重复命名校验)
+        const pathParamsInterfaceName: string = this.generateParamsInterfaceName(basename + 'Path', duplicate)
+        // 1.4 生成响应接口命名 (具有唯一性, 不需要重复命名校验)
+        const responseOriginInterfaceName: string = this.generateResponseInterfaceName(basename)
 
+        // 2.1 清理全局参数
         transform(detail.requestBody.jsonSchema, globalRequestParams)
+        // 2.2 添加父类继承
         appendParentInterface(detail.requestBody.jsonSchema, globalRequestParams.extend)
 
-        let params: string | null = ''
-
+        // * jsonSchema to ts 生成器参数
         const opt: Partial<json2ts.Options> = {
             bannerComment: ``,
             unreachableDefinitions: true,
@@ -207,6 +251,8 @@ export class Generator {
             additionalProperties: false,
             unknownAny: false
         }
+        // 3. 生成的参数接口内容
+        let params: string | null = null
 
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
             try {
@@ -215,17 +261,16 @@ export class Generator {
                 point.error('json2ts parser error: ' + paramsInterfaceName)
                 params = `export interface ${paramsInterfaceName} { [key:string|number]: any }`
             }
-        } else {
-            params = null
         }
 
+        // 4. 生成响应接口内容
         const responseNames = []
         const responses = []
 
         for (const resp of detail.responses) {
             transform(resp.jsonSchema, globalResponseParams)
             appendParentInterface(resp.jsonSchema, globalResponseParams.extend)
-            const rin: string = formatNameSuffixByDuplicate(responseInterfaceName, duplicate)
+            const rin: string = formatNameSuffixByDuplicate(responseOriginInterfaceName, duplicate)
             let response!: string
             try {
                 response = await json2ts.compile(resp.jsonSchema, rin, opt)
@@ -235,6 +280,18 @@ export class Generator {
             }
             responseNames.push(rin)
             responses.push(response)
+        }
+
+        // 生成 Resutful Api 路径参数接口内容
+        let pathParams: string | null = null
+        if (detail?.parameters?.path?.length) {
+            try {
+                const scheam = transformPathParamsToJsonScheam(detail.parameters.path)
+                pathParams = await json2ts.compile(scheam, pathParamsInterfaceName, opt)
+            } catch (error) {
+                // skip
+                point.error('json2ts parser error: ' + pathParamsInterfaceName)
+            }
         }
 
         return {
@@ -247,10 +304,58 @@ export class Generator {
             updatedAt,
             hasParams: !!params,
             params: params,
-            responses: responses,
             paramsName: paramsInterfaceName,
-            responseNames
+            responses: responses,
+            responseNames,
+            hasPathParams: !!pathParams,
+            pathParamsName: pathParamsInterfaceName,
+            pathParams
         }
+    }
+
+    /** 生成 basename, 用于接口方法名
+     *
+     * @param path 接口路径
+     * @param duplicate 命名重复计数
+     * @param baseUrl 相对baseUrl
+     * @returns
+     */
+    generateBaseName(path: string, duplicate: { [key: string]: number }, baseUrl: string): string {
+        // 根据如下步骤, 生成接口方法名
+        return [
+            // 1. (预处理) 移除路径中的 baseUrl
+            (str: string) => str.replace(baseUrl, ''),
+            // 2. (预处理) 移除路径中的 Restful Api 参数
+            (str: string) => str.replace(/[\$]{0,1}\{.+?\}/g, ''),
+            // 3. 删除路径中的起始斜杠(/)
+            (str: string) => str.replace(/^[\/]+/g, ''),
+            // 4. 将 Relative Path 的分隔符(/) 转化为下划线
+            (str: string) => str.replace(/[\/]+/g, '_'),
+            // 5. 转换为驼峰格式命名
+            (str: string) => formatToHump(str),
+            // 6. 重复接口路径处理
+            (str: string) => formatNameSuffixByDuplicate(str, duplicate),
+            // 7. 处理路径命名的Js关键词占用
+            (str: string) => formatNameByDisabledKeyword(str)
+        ].reduce((name: string, format) => format(name), path)
+    }
+
+    /** 生成参数接口命名
+     *
+     * @param basename 接口路径
+     * @param duplicate
+     * @returns
+     */
+    generateParamsInterfaceName(basename: string, duplicate: { [key: string]: number }): string {
+        return formatNameSuffixByDuplicate(formatInterfaceName(basename, 'Params'), duplicate)
+    }
+    /** 生成响应接口命名
+     *
+     * @param basename 接口路径
+     * @returns
+     */
+    generateResponseInterfaceName(basename: string): string {
+        return formatInterfaceName(basename, 'Response')
     }
 
     /** 基于模板生成文件结构
@@ -300,8 +405,7 @@ export class Generator {
     /** 生成文件内容 */
     generateContext(name: string, maps: Array<IApiOriginInfo>): string {
         const { requestUtil } = this.config.template
-        let context: string = '',
-            allowSkipParam: boolean
+        let context: string = ''
         for (const info of maps) {
             // 添加 params interface
             if (info.hasParams) {
@@ -310,15 +414,30 @@ export class Generator {
                 context += info.params
                 context += '\n'
             }
-            allowSkipParam = !info.params || !/[\w]+:/gm.test(info.params)
+
+            // 添加 path params interface
+            if (info.hasPathParams) {
+                context += `/** path params interface | ${info.name} */`
+                context += '\n'
+                context += info.pathParams
+                context += '\n'
+            }
+
             // 添加 response interface
             context += `/** response interface | ${info.name} */`
             context += '\n'
             context += info.responses.join('\n')
             context += '\n'
+
             // 添加 request function
             const usageParams: string = info.hasParams ? ', params' : ''
-            const apiPath: string = `'${info.path}'`
+            let apiPath: string
+            if (info.hasPathParams) {
+                apiPath = info.path.replace(/[\$]{0,1}\{(.+?)\}/g, '${params.$1}')
+                apiPath = '`' + apiPath + '`'
+            } else {
+                apiPath = `'${info.path}'`
+            }
             let requestFunction = `
                 /** ${name} - ${info.name}
                  * 
@@ -332,11 +451,19 @@ export class Generator {
             // 替换 api path
             requestFunction = requestFunction.replace(/\[api url\]/, info.path)
             // 替换参数
-            if (info.hasParams) {
-                requestFunction = requestFunction.replace(/\[params comment\]/, `@param {${info.paramsName}} params`)
+            if (info.hasParams || info.hasPathParams) {
+                const paramsNames: string = [
+                    info.hasParams ? info.paramsName : null,
+                    info.hasPathParams ? info.pathParamsName : null
+                ]
+                    .filter((pc) => pc)
+                    .join('&')
+                // 什么情况下参数可选? 1. 不存在path params 2. 不存在 params 3. 接口中存在可选变量
+                const allowSkipParam: boolean = !info.hasPathParams && (!info.params || !/[\w]+:/gm.test(info.params))
+                requestFunction = requestFunction.replace(/\[params comment\]/, `@param {${paramsNames}} params`)
                 requestFunction = requestFunction.replace(
                     /\[params\]/,
-                    `params${allowSkipParam ? '?' : ''}: ${info.paramsName}`
+                    `params${allowSkipParam ? '?' : ''}: ${paramsNames}`
                 )
             } else {
                 requestFunction = requestFunction.replace(/\[params comment\]/, '')

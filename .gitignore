@@ -3,4 +3,5 @@ node_modules/
 .temp/
 .cache/
 src/
+__src__/
 apifox.rule.json

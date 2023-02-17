@@ -2,6 +2,7 @@ import { IGlobalParams } from '../intf/IConfig'
 import { TDetils } from '../intf/IDetail'
 import { TSchemas } from '../intf/ISchema'
 import { klona } from 'klona'
+import { JSONSchema } from 'json-schema-to-typescript'
 
 /** 处理JSONSchema
  *
@@ -88,4 +89,26 @@ export const transformSchemaRef = (details: TDetils = [], schemas: TSchemas = []
 /** 移除已废弃API */
 export const removeDeprecatedApi = (details: TDetils = []): TDetils => {
     return details.filter((d) => d.status !== 'deprecated')
+}
+
+/** 转换 url path params 参数格式为JsonScheam */
+export const transformPathParamsToJsonScheam = (path: any): JSONSchema => {
+    if (!(path instanceof Array)) {
+        path = [path]
+    }
+    const jsonscheam: any = {
+        type: 'object',
+        properties: {},
+        required: []
+    }
+
+    for (const item of path) {
+        jsonscheam.properties[item.name] = {
+            type: item.type ?? 'string',
+            required: true,
+            description: item.description
+        }
+        jsonscheam.required.push(item.name)
+    }
+    return jsonscheam
 }

@@ -20,4 +20,4 @@ export interface ITreeNode {
     };
     children: Array<ITreeNode>;
 }
-export declare type TTreeNodes = Array<ITreeNode>;
+export type TTreeNodes = Array<ITreeNode>;

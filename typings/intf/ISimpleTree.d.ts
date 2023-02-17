@@ -3,4 +3,4 @@ export interface ISimpleTree {
     name: string;
     children?: Array<ISimpleTree>;
 }
-export declare type TSimpleTrees = Array<ISimpleTree>;
+export type TSimpleTrees = Array<ISimpleTree>;

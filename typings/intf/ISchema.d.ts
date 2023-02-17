@@ -13,4 +13,4 @@ export interface ISchema {
     updatedAt: string | null;
     deletedAt: string | null;
 }
-export declare type TSchemas = Array<ISchema>;
+export type TSchemas = Array<ISchema>;
