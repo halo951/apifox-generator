@@ -8,6 +8,8 @@ export declare const runLanguageForm: (language?: 'js' | 'ts') => Promise<'js' |
 export declare const runOutputDirForm: (outDir?: string) => Promise<string>;
 /** 选择是否创建公共导出文件 */
 export declare const runAppendIndexFileForm: (appendIndexFile?: boolean) => Promise<boolean>;
+/** 选择是否开启严格模式 */
+export declare const runConfirmStrictMode: (strict: any) => Promise<boolean>;
 /** 设置项目模板 */
 export declare const runTemplateForm: (template: IGenerateTemplate) => Promise<IGenerateTemplate>;
 /** token 检查 及登录 */

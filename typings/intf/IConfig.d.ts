@@ -60,6 +60,8 @@ export interface IConfig {
     projectId: string;
     /** 是否添加 index.ts 作为公共出口文件 */
     appendIndexFile: boolean;
+    /** 是否启用严格模式 */
+    strict: boolean;
     folders: TSimpleTrees;
     /** 使用哪些接口 */
     usage: Array<ISimpleTree>;
