@@ -46,3 +46,36 @@ export const formatNameByDisabledKeyword = (name: string): string => {
 export const clearRestfulApiUrlParams = (str: string) => {
     return str.replace(/[\$]{0,1}\{.+?\}/g, '')
 }
+
+/** 裁剪超长路径段
+ *
+ * @description 约定规则: 当多段 url 中段落数(以 / 分隔)超过阈值时, 从后向前裁剪多余部分
+ */
+export const splitLongNameByPath = (str: string, max: number): string => {
+    const tmp: Array<string> = str.split('/')
+    if (tmp.length > max) {
+        return tmp.slice(tmp.length - max, tmp.length).join('/')
+    } else {
+        return str
+    }
+}
+
+/** 裁剪超长单词
+ *
+ * @description 约定规则: 在不破坏单个路径段的情况下, 根据单词数量匹配url, 当超过阈值时, 从后向前裁剪多余的部分
+ */
+export const splitLongCamelCaseNameByPath = (str: string, max: number): string => {
+    // 1. 按大写字符做分割符, 分割字符串
+    const tmp: Array<string> = str.split('/')
+    let count: number = 0
+    let out = []
+    for (let n = tmp.length - 1; n >= 0; n--) {
+        if (count >= max) break
+        const block: string = tmp[n]
+        // ! 注意这里`非`匹配会多匹配一位, 计算时需减 1
+        const matched = block.match(/(?![a-z0-9])/g)
+        count += matched?.length ?? 0
+        out.unshift(block)
+    }
+    return out.join('/')
+}

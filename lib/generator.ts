@@ -29,7 +29,9 @@ import {
     formatInterfaceName,
     formatNameByDisabledKeyword,
     formatNameSuffixByDuplicate,
-    formatToHump
+    formatToHump,
+    splitLongNameByPath,
+    splitLongCamelCaseNameByPath
 } from './utils/format'
 import { point } from './utils/point'
 import { loading, step } from './utils/decorators'
@@ -327,15 +329,19 @@ export class Generator {
             (str: string) => str.replace(baseUrl, ''),
             // 2. (预处理) 移除路径中的 Restful Api 参数
             (str: string) => str.replace(/[\$]{0,1}\{.+?\}/g, ''),
-            // 3. 删除路径中的起始斜杠(/)
+            // 3. (预处理) 裁剪超长路径名
+            (str: string) => splitLongNameByPath(str, 3),
+            // 4. (预处理) 裁剪接口命名词汇超过3个单词的命名
+            (str: string) => splitLongCamelCaseNameByPath(str, 3),
+            // 5. 删除路径中的起始斜杠(/)
             (str: string) => str.replace(/^[\/]+/g, ''),
-            // 4. 将 Relative Path 的分隔符(/) 转化为下划线
+            // 6. 将 Relative Path 的分隔符(/) 转化为下划线
             (str: string) => str.replace(/[\/]+/g, '_'),
-            // 5. 转换为驼峰格式命名
+            // 7. 转换为驼峰格式命名
             (str: string) => formatToHump(str),
-            // 6. 重复接口路径处理
+            // 8. (后处理) 重复接口路径处理
             (str: string) => formatNameSuffixByDuplicate(str, duplicate),
-            // 7. 处理路径命名的Js关键词占用
+            // 9. (后处理) 处理路径命名的Js关键词占用
             (str: string) => formatNameByDisabledKeyword(str)
         ].reduce((name: string, format) => format(name), path)
     }
