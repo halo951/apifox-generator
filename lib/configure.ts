@@ -18,7 +18,6 @@ import { step } from './utils/decorators'
 import { ISimpleTree, TSimpleTrees } from './intf/ISimpleTree'
 import { TreeSelectPrompt } from './utils/tree-select-prompt'
 import { TSchemas } from './intf/ISchema'
-import fs from 'fs'
 
 /** 处理配置变更, 用户配置项输入 */
 export class Configure {
@@ -102,9 +101,6 @@ export class Configure {
         this.treeList = treeList
         this.details = details
         this.schemas = schemas
-        fs.writeFileSync('./treeList.json', JSON.stringify(treeList, null, 4), { encoding: 'utf-8' })
-        fs.writeFileSync('./details.json', JSON.stringify(details, null, 4), { encoding: 'utf-8' })
-        fs.writeFileSync('./schemas.json', JSON.stringify(schemas, null, 4), { encoding: 'utf-8' })
     }
 
     /** 读取 api文件夹集合 */

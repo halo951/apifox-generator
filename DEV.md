@@ -1,11 +1,21 @@
 # 下一个大版本架构设计
 
+贡献请遵循 GitFlow 规范
+
+-   功能变更,拉取新分支 `feature/*`
+-   修复变更,拉取新分支 `fixure/*`
+-
+
 ```
 .
 |-
 |- 命令
     |- 默认, -c | 生成接口
     |- -r, --reset | 重新配置
+    |- -i, --import | 向项目中导入 request 工具 (默认 axios, @persagy2/request)
+    |- -m, --md | 生成 markdown (生成markdown格式的接口信息)
+|- ./scripts
+    |- import-requet | 导入 import 工具
 |- ./config --------- 配置入口
     |- 配置项
         |- 版本号
