@@ -65,6 +65,9 @@ export interface IConfig {
     projectId: string
     /** 是否添加 index.ts 作为公共出口文件 */
     appendIndexFile: boolean
+
+    /** 是否启用严格模式 */
+    strict: boolean
     /* 可用接口集合 (用于校验本地配置规则与apifox文档对比是否一致, 避免出现新增接口文件夹, 本地不更新情况) */
     folders: TSimpleTrees
     /** 使用哪些接口 */

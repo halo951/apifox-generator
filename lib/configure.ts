@@ -11,7 +11,8 @@ import {
     runTemplateForm,
     runProjectIdForm,
     runSetApiFileNameMapForm,
-    runConfirmMergeDirectory
+    runConfirmMergeDirectory,
+    runConfirmStrictMode
 } from './utils/forms'
 import { step } from './utils/decorators'
 import { ISimpleTree, TSimpleTrees } from './intf/ISimpleTree'
@@ -58,6 +59,8 @@ export class Configure {
         this.config.outDir = await runOutputDirForm(this.config.outDir)
         // -> 设置是否生成公共导出文件 (index.ts)
         this.config.appendIndexFile = await runAppendIndexFileForm(this.config.appendIndexFile)
+        // -> 设置是否应用严格模式 (将保障接口的唯一性)
+        this.config.strict = await runConfirmStrictMode(this.config.strict)
         // -> 设置生成模板
         this.config.template = await runTemplateForm(this.config.template)
         // -> token 检查 or 用户登录

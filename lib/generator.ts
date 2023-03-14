@@ -212,7 +212,7 @@ export class Generator {
             }
             return errMsgs
         }, [])
-        if (errMsgs.length > 0) {
+        if (this.config.strict && errMsgs.length > 0) {
             errMsgs.unshift('\n*************************************\n')
             errMsgs.push('\n\n\n')
             for (const msg of errMsgs) point.error(msg)

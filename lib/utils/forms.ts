@@ -139,6 +139,23 @@ export const runAppendIndexFileForm = async (appendIndexFile?: boolean): Promise
     })
 }
 
+/** 选择是否开启严格模式 */
+export const runConfirmStrictMode = async (strict: any): Promise<boolean> => {
+    if (strict !== undefined) return strict
+    return await createTaskRunner({
+        input: async () => {
+            const { create } = await enquirer.prompt({
+                type: 'confirm',
+                name: 'create',
+                message: createMessage('是否开启严格模式? (严格模式下, 禁止接口路径相同)'),
+                initial: strict
+            })
+
+            return create
+        }
+    })
+}
+
 /** 设置项目模板 */
 export const runTemplateForm = async (template: IGenerateTemplate): Promise<IGenerateTemplate> => {
     if (Object.keys(template ?? {}).length === 0) {
