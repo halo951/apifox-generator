@@ -182,6 +182,10 @@ export class Generator {
     }
     /** 从 apis 的 path 中, 取出路径中相同的前缀, 作为baseUrl */
     extractBaseUrlByApis(apis: Array<IDetail>): string {
+        // ? 当接口数量<=1时, 无有效参考值, 故不生成baseUrl
+        if (apis.length <= 1) {
+            return ''
+        }
         // 获取待操作的paths
         const paths: Array<string> = apis.map((api) => api.path)
         // 将段落分段
@@ -319,14 +323,14 @@ export class Generator {
      *
      * @param path 接口路径
      * @param duplicate 命名重复计数
-     * @param baseUrl 相对baseUrl
+     * @param baseUrl 相对baseUrl 注: 即将废弃此参数
      * @returns
      */
     generateBaseName(path: string, duplicate: { [key: string]: number }, baseUrl: string): string {
         // 根据如下步骤, 生成接口方法名
         return [
             // 1. (预处理) 移除路径中的 baseUrl
-            (str: string) => str.replace(baseUrl, ''),
+            // (str: string) => str.replace(baseUrl, ''),
             // 2. (预处理) 移除路径中的 Restful Api 参数
             (str: string) => str.replace(/[\$]{0,1}\{.+?\}/g, ''),
             // 3. (预处理) 裁剪超长路径名
