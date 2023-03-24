@@ -28,24 +28,29 @@ export declare class Generator {
     findApisByFolder(treeList: Array<ITreeNode>, id?: string | number): Array<IDetail>;
     /** 查找组路径 */
     findGroupPath(id: string | number, list: Array<ITreeNode>): string;
-    /** 从 apis 的 path 中, 取出路径中相同的前缀, 作为baseUrl */
-    extractBaseUrlByApis(apis: Array<IDetail>): string;
+    /** 判断 apis 列表中, 最后一段url是否包含单个单词, 或重复项, 如果不包含, 那么执行快速命名  */
+    checkApisHasSingleWordOrDuplicatedName(apis: Array<IDetail>): boolean;
     /** 检查 apis 集合内, 是否存在完全相同的 path  */
     checkDuplicatePath(apis: Array<IDetail>): void;
-    /** 转换元数据为生成接口需要的信息 */
+    /** 转换元数据为生成接口需要的信息
+     *
+     * @param {IDetail} detail 接口详细信息
+     * @param {any} duplicate 命名重复次数
+     * @param {boolean} repeatedUrlTail 尾端url是否重复 (包括仅包含1个单词的情况)
+     */
     transformApiInfo(detail: IDetail, duplicate: {
         [key: string]: number;
-    }, baseUrl: string): Promise<IApiOriginInfo>;
+    }, repeatedUrlTail: boolean): Promise<IApiOriginInfo>;
     /** 生成 basename, 用于接口方法名
      *
      * @param path 接口路径
      * @param duplicate 命名重复计数
-     * @param baseUrl 相对baseUrl
+     * @param repeatedUrlTail 尾端url是否重复 (包括仅包含1个单词的情况)
      * @returns
      */
     generateBaseName(path: string, duplicate: {
         [key: string]: number;
-    }, baseUrl: string): string;
+    }, repeatedUrlTail: boolean): string;
     /** 生成参数接口命名
      *
      * @param basename 接口路径

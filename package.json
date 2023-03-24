@@ -1,6 +1,6 @@
 {
     "name": "apifox-generator",
-    "version": "1.4.6",
+    "version": "1.4.7",
     "description": "generate project api maps by apifox agreement",
     "keywords": [
         "apifox",
@@ -27,7 +27,7 @@
     "scripts": {
         "clean": "rimraf dist && rimraf typings",
         "build": "rollup --config ./rollup.config.ts --configPlugin typescript2",
-        "preview": "yarn build && node bin/cli",
+        "preview": "yarn build && rimraf __src__ && node bin/cli",
         "lint:fix": "prettier -w **.ts **.md **.json",
         "test": "jest --coverage"
     },

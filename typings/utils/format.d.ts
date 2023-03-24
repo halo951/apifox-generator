@@ -20,3 +20,5 @@ export declare const splitLongNameByPath: (str: string, max: number) => string;
  * @description 约定规则: 在不破坏单个路径段的情况下, 根据单词数量匹配url, 当超过阈值时, 从后向前裁剪多余的部分
  */
 export declare const splitLongCamelCaseNameByPath: (str: string, max: number) => string;
+/** 裁剪获取url段落中最后一段 (非Restful api path部分)  */
+export declare const urlLastParagraph: (url: string) => string | null;

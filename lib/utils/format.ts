@@ -79,3 +79,15 @@ export const splitLongCamelCaseNameByPath = (str: string, max: number): string =
     }
     return out.join('/')
 }
+
+/** 裁剪获取url段落中最后一段 (非Restful api path部分)  */
+export const urlLastParagraph = (url: string): string | null => {
+    const paragraphs: Array<string> = url.split('/')
+    // > 从后向前获取url路径段中, 非Restful Api path 参数部分
+    let paragraph: string | null = paragraphs.reverse().reduce((out: string | null, paragraph: string) => {
+        if (out) return out
+        if (/[\$]{0,1}\{.+?\}/.test(paragraph)) return null
+        return paragraph
+    }, null)
+    return paragraph
+}

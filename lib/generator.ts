@@ -31,7 +31,8 @@ import {
     formatNameSuffixByDuplicate,
     formatToHump,
     splitLongNameByPath,
-    splitLongCamelCaseNameByPath
+    splitLongCamelCaseNameByPath,
+    urlLastParagraph
 } from './utils/format'
 import { point } from './utils/point'
 import { loading, step } from './utils/decorators'
@@ -82,13 +83,13 @@ export class Generator {
             // 检查 apis 集合内, 是否存在完全相同的 path, 弹出报错信息
             this.checkDuplicatePath(apis)
             // 从 apis 集合内, 获取 baseUrl 属性 (注: 用来处理 Restful Api 范式出现的短路径重复问题)
-            const baseUrl: string = this.extractBaseUrlByApis(apis)
+            const repeatedUrlTail: boolean = this.checkApisHasSingleWordOrDuplicatedName(apis)
             /** 定义用于记录重复命名的 方法名, 参数接口名, 响应接口名 */
             const duplicate: { [key: string]: number } = {}
             // 转换为接口生成需要的信息
             const maps: Array<IApiOriginInfo> = []
             for (const api of apis) {
-                const info = await this.transformApiInfo(api, duplicate, baseUrl)
+                const info = await this.transformApiInfo(api, duplicate, repeatedUrlTail)
                 maps.push(info)
             }
             // 获取组路径
@@ -180,33 +181,23 @@ export class Generator {
         if (log.length === 0) return '*'
         return log.map((l) => l.name).join(' - ')
     }
-    /** 从 apis 的 path 中, 取出路径中相同的前缀, 作为baseUrl */
-    extractBaseUrlByApis(apis: Array<IDetail>): string {
-        // ? 当接口数量<=1时, 无有效参考值, 故不生成baseUrl
-        if (apis.length <= 1) {
-            return ''
-        }
-        // 获取待操作的paths
-        const paths: Array<string> = apis.map((api) => api.path)
-        // 将段落分段
-        const paragraphs: Array<Array<string>> = paths.map((path) => path.split('/'))
-        // 获取分段后, 最小的路径段长度
-        let min: number = paragraphs.reduce(
-            (min: number, p: Array<string>) => (min < p.length ? min : p.length),
-            paragraphs[0].length
-        )
-        let baseUrl: Array<string> = []
-        // 循环生成baseUrl, 默认情况下以最短的Url路径段为准
-        for (let n = 0; n < min; n++) {
-            const current: Array<string> = paragraphs.map((p) => p[n])
-            const set = new Set(current)
-            if (set.size > 1) {
-                break
-            } else {
-                baseUrl.push(current[0])
+    /** 判断 apis 列表中, 最后一段url是否包含单个单词, 或重复项, 如果不包含, 那么执行快速命名  */
+    checkApisHasSingleWordOrDuplicatedName(apis: Array<IDetail>): boolean {
+        let names: Set<string> = new Set()
+        for (let api of apis) {
+            // > 从后向前获取url路径段中, 非Restful Api path 参数部分
+            let paragraph: string | null = urlLastParagraph(api.path)
+
+            if (!paragraph) continue
+
+            // ? 判断 set 中是否包含相同的url段落, 或这不存在多个单词 (没有大写单词或 - 分割符)
+            if (names.has(paragraph) || !/[A-Z-]/.test(paragraph)) {
+                return true
             }
+
+            names.add(paragraph)
         }
-        return baseUrl.join('/')
+        return false
     }
 
     /** 检查 apis 集合内, 是否存在完全相同的 path  */
@@ -226,19 +217,24 @@ export class Generator {
         }
     }
 
-    /** 转换元数据为生成接口需要的信息 */
+    /** 转换元数据为生成接口需要的信息
+     *
+     * @param {IDetail} detail 接口详细信息
+     * @param {any} duplicate 命名重复次数
+     * @param {boolean} repeatedUrlTail 尾端url是否重复 (包括仅包含1个单词的情况)
+     */
     async transformApiInfo(
         detail: IDetail,
         duplicate: { [key: string]: number },
-        baseUrl: string
+        repeatedUrlTail: boolean
     ): Promise<IApiOriginInfo> {
         const { id, method, path, name, createdAt, updatedAt } = detail
         const { globalRequestParams, globalResponseParams } = this.config.template
         // 1.1 生成baseName, 作为接口调用方法名
-        const basename: string = this.generateBaseName(path, duplicate, baseUrl)
+        const basename: string = this.generateBaseName(path, duplicate, repeatedUrlTail)
         // 1.2 生成参数接口命名
         const paramsInterfaceName: string = this.generateParamsInterfaceName(basename, duplicate)
-        // 1.3 生成 Restfule Api 路径参数接口命名 (具有唯一性, 不需要重复命名校验)
+        // 1.3 生成 Restful Api 路径参数接口命名 (具有唯一性, 不需要重复命名校验)
         const pathParamsInterfaceName: string = this.generateParamsInterfaceName(basename + 'Path', duplicate)
         // 1.4 生成响应接口命名 (具有唯一性, 不需要重复命名校验)
         const responseOriginInterfaceName: string = this.generateResponseInterfaceName(basename)
@@ -323,20 +319,20 @@ export class Generator {
      *
      * @param path 接口路径
      * @param duplicate 命名重复计数
-     * @param baseUrl 相对baseUrl 注: 即将废弃此参数
+     * @param repeatedUrlTail 尾端url是否重复 (包括仅包含1个单词的情况)
      * @returns
      */
-    generateBaseName(path: string, duplicate: { [key: string]: number }, baseUrl: string): string {
+    generateBaseName(path: string, duplicate: { [key: string]: number }, repeatedUrlTail: boolean): string {
         // 根据如下步骤, 生成接口方法名
         return [
-            // 1. (预处理) 移除路径中的 baseUrl
-            // (str: string) => str.replace(baseUrl, ''),
+            // 1. (预处理) 当尾段url不重复时, 生成更简短的命名
+            (str: string) => (!repeatedUrlTail ? urlLastParagraph(str) ?? str : str),
             // 2. (预处理) 移除路径中的 Restful Api 参数
             (str: string) => str.replace(/[\$]{0,1}\{.+?\}/g, ''),
             // 3. (预处理) 裁剪超长路径名
             (str: string) => splitLongNameByPath(str, 3),
             // 4. (预处理) 裁剪接口命名词汇超过3个单词的命名
-            (str: string) => splitLongCamelCaseNameByPath(str, 3),
+            (str: string) => splitLongCamelCaseNameByPath(str, 4),
             // 5. 删除路径中的起始斜杠(/)
             (str: string) => str.replace(/^[\/]+/g, ''),
             // 6. 将 Relative Path 的分隔符(/) 转化为下划线
