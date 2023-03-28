@@ -19,8 +19,17 @@ export const formatNameSuffixByDuplicate = (name: string, duplicate: { [key: str
     } else {
         duplicate[name]++
     }
-    name += duplicate[name] === 1 ? '' : duplicate[name] - 1
-    return name
+    if (duplicate[name] === 1) {
+        return name
+    } else {
+        const newName: string = name + (duplicate[name] - 1)
+        // ? 处理仍然重复的情况
+        if (duplicate[newName]) {
+            return formatNameSuffixByDuplicate(name, duplicate)
+        } else {
+            return newName
+        }
+    }
 }
 
 /** 格式化接口命名, 避免占用关键字 */

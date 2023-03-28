@@ -332,7 +332,7 @@ export class Generator {
             // 3. (预处理) 裁剪超长路径名
             (str: string) => splitLongNameByPath(str, 3),
             // 4. (预处理) 裁剪接口命名词汇超过3个单词的命名
-            (str: string) => splitLongCamelCaseNameByPath(str, 4),
+            (str: string) => splitLongCamelCaseNameByPath(str, 3),
             // 5. 删除路径中的起始斜杠(/)
             (str: string) => str.replace(/^[\/]+/g, ''),
             // 6. 将 Relative Path 的分隔符(/) 转化为下划线
