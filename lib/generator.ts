@@ -255,7 +255,22 @@ export class Generator {
         }
         // 3. 生成的参数接口内容
         let params: string | null = null
-
+        let schema = detail.requestBody?.jsonSchema
+        if (schema) {
+            if (
+                // 默认 object 格式
+                (schema.type === 'object' && Object.keys(schema.properties ?? {}).length > 0) ||
+                // 兼容 array 格式
+                (schema.type === 'array' && Object.keys(schema.items.properties ?? {}).length > 0)
+            ) {
+                try {
+                    params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, opt)
+                } catch (error) {
+                    point.error('json2ts parser error: ' + paramsInterfaceName)
+                    params = `export interface ${paramsInterfaceName} { [key:string|number]: any }`
+                }
+            }
+        }
         if (Object.keys(detail.requestBody?.jsonSchema?.properties || {}).length > 0) {
             try {
                 params = await json2ts.compile(detail.requestBody.jsonSchema, paramsInterfaceName, opt)
