@@ -1,5 +1,8 @@
 # apifox 接口生成器
 
+> [TIPS] 
+<p style='color:red; font-weight: bold; font-size: 24px;'>这个 package 废弃了, 请跳转到新的包 <a href='https://www.npmjs.com/package/api-refs'>api-refs</a> </p>
+
 ## about
 
 > 这是一个能够显著提高前端开发效率的工具。基于 apifox 的 JSONSchema 规范, 生成前端项目使用的接口调用文件.
