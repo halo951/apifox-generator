@@ -1,4 +1,11 @@
+## 这个版本有些前期设计不合理, 重写了一版, 需要的话用新版本~
+
+- npm : https://www.npmjs.com/package/api-refs
+- github: https://github.com/halo951/api-refs
+
 # apifox 接口生成器
+
+
 
 ## about
 
